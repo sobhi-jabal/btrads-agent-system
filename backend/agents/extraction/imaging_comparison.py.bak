@@ -1,0 +1,137 @@
+"""Agent for imaging comparison assessment (Node 2)"""
+import json
+import re
+from typing import Tuple, Any, Dict, List
+
+from langchain.prompts import PromptTemplate
+from agents.base import BaseAgent
+from models.agent import MissingInfo
+
+class ImagingComparisonAgent(BaseAgent):
+    """Agent for comparing current imaging with prior (improved/unchanged/worse)"""
+    
+    def __init__(self, **kwargs):
+        super().__init__(
+            agent_id="imaging_comparison_agent",
+            node_id="node_2_imaging_assessment",
+            **kwargs
+        )
+    
+    def _get_system_prompt(self) -> str:
+        return """You are a neuroradiology expert applying BT-RADS imaging assessment criteria using quantitative volume data.
+Your task is to compare current imaging with prior using both volume measurements and clinical descriptions."""
+    
+    def _get_extraction_prompt(self) -> PromptTemplate:
+        return PromptTemplate(
+            input_variables=[
+                "clinical_note", "system_prompt",
+                "flair_change_pct", "enhancement_change_pct",
+                "baseline_date", "followup_date"
+            ],
+            template="""{system_prompt}
+
+Clinical Note:
+{clinical_note}
+
+VOLUME DATA:
+- Baseline imaging: {baseline_date}
+- Follow-up imaging: {followup_date}
+- FLAIR volume change: {flair_change_pct}%
+- Enhancement volume change: {enhancement_change_pct}%
+
+CRITICAL RULES:
+1. NEGATIVE percentage = DECREASED volume = IMPROVEMENT
+2. POSITIVE percentage = INCREASED volume = WORSENING  
+3. Values between -10% and +10% = STABLE/UNCHANGED
+4. ENHANCEMENT PRIORITY: When FLAIR and enhancement change in opposite directions, prioritize enhancement
+
+DECISION LOGIC:
+- Both decreased (negative %) -> "improved"
+- Both stable (±10%) -> "unchanged" 
+- Either shows significant increase (>10%) -> "worse"
+- Mixed pattern -> Follow enhancement direction
+
+Return JSON:
+{{
+    "assessment": "improved/unchanged/worse/unknown",
+    "reasoning": "explanation including volume analysis",
+    "confidence": 0.0-1.0,
+    "volume_pattern": "both_decreased/both_stable/both_increased/mixed",
+    "enhancement_priority_applied": true/false
+}}"""
+        )
+    
+    def _parse_llm_response(self, response: str) -> Tuple[Any, str, float]:
+        """Parse JSON response from LLM"""
+        try:
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+                return (
+                    data.get("assessment", "unknown"),
+                    data.get("reasoning", "No reasoning provided"),
+                    float(data.get("confidence", 0.5))
+                )
+        except json.JSONDecodeError:
+            pass
+        
+        return ("unknown", "Could not parse response", 0.3)
+    
+    def _validate_extraction(self, value: Any, context: Dict[str, Any]) -> bool:
+        """Validate against volume data"""
+        if value == "unknown":
+            return True
+            
+        # Get volume changes
+        flair_change = context.get("flair_change_pct")
+        enh_change = context.get("enhancement_change_pct")
+        
+        if flair_change is None or enh_change is None:
+            return True  # Can't validate without data
+        
+        # Apply enhancement priority rule
+        try:
+            flair_val = float(flair_change)
+            enh_val = float(enh_change)
+            
+            # Check for mixed pattern
+            flair_dir = "up" if flair_val > 10 else ("down" if flair_val < -10 else "stable")
+            enh_dir = "up" if enh_val > 10 else ("down" if enh_val < -10 else "stable")
+            
+            if flair_dir != enh_dir and flair_dir != "stable" and enh_dir != "stable":
+                # Mixed pattern - enhancement priority
+                expected = "worse" if enh_dir == "up" else "improved"
+                return value == expected
+            
+            # Standard validation
+            if flair_val > 10 or enh_val > 10:
+                return value == "worse"
+            elif flair_val < -10 or enh_val < -10:
+                return value == "improved"
+            else:
+                return value == "unchanged"
+                
+        except (ValueError, TypeError):
+            return True
+    
+    def _get_fallback_suggestion(self) -> str:
+        return "Use volume measurements if available, otherwise clinical impression"
+    
+    def _check_missing_info(
+        self,
+        extracted_value: Any,
+        confidence: float,
+        context: Dict[str, Any]
+    ) -> List[MissingInfo]:
+        """Check for missing volume data"""
+        missing = super()._check_missing_info(extracted_value, confidence, context)
+        
+        if context.get("flair_change_pct") is None or context.get("enhancement_change_pct") is None:
+            missing.append(MissingInfo(
+                field="volume_data",
+                reason="FLAIR or enhancement volume changes not available",
+                clinical_impact="Cannot apply quantitative BT-RADS criteria",
+                suggested_fallback="Text-based assessment only"
+            ))
+        
+        return missing

@@ -1,0 +1,108 @@
+"""Agent for analyzing extent of changes"""
+from typing import Dict, Any, List, Optional
+import logging
+
+from agents.base import BaseAgent
+from models.agent import AgentResult
+
+logger = logging.getLogger(__name__)
+
+class ExtentAnalysisAgent(BaseAgent):
+    """Agent responsible for analyzing extent of changes (localized vs distant)"""
+    
+    def __init__(self):
+        super().__init__(
+            agent_id="extent-analysis",
+            name="Extent Analysis Agent",
+            description="Analyzes whether changes are localized or involve distant sites"
+        )
+    
+    async def extract(self, clinical_note: str, context: Dict[str, Any], patient_id: str) -> AgentResult:
+        """Extract extent analysis from clinical note"""
+        try:
+            # Use Ollama for extraction
+            prompt = self._create_prompt(clinical_note)
+            
+            # Extract extent information
+            extracted_data = await self._call_llm(prompt)
+            
+            # Determine extent category
+            is_localized = extracted_data.get("is_localized", True)
+            has_distant_sites = extracted_data.get("has_distant_sites", False)
+            
+            result_data = {
+                "is_localized": is_localized,
+                "has_distant_sites": has_distant_sites,
+                "extent_category": "distant" if has_distant_sites else "localized",
+                "locations": extracted_data.get("locations", []),
+                "extent_description": extracted_data.get("extent_description", "")
+            }
+            
+            # Find source sentences
+            source_highlights = await self._highlight_sources(
+                clinical_note, 
+                extracted_data.get("evidence_sentences", [])
+            )
+            
+            return AgentResult(
+                agent_id=self.agent_id,
+                patient_id=patient_id,
+                node_id="extent-analysis",
+                extracted_value=result_data,
+                confidence=extracted_data.get("confidence", 0.75),
+                reasoning=extracted_data.get("reasoning", ""),
+                source_highlights=source_highlights
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in ExtentAnalysisAgent: {e}")
+            return self._create_error_result(patient_id, str(e))
+    
+    def _create_prompt(self, clinical_note: str) -> str:
+        """Create prompt for extent analysis"""
+        return f"""
+        Analyze the extent of changes described in this clinical note.
+        
+        Clinical Note:
+        {clinical_note}
+        
+        Task: Determine whether changes are localized or involve distant sites.
+        Look for:
+        - Mentions of multiple locations or sites
+        - Words like "multifocal", "distant", "widespread", "disseminated"
+        - Specific anatomical locations mentioned
+        - Any indication of new lesions at distant sites
+        
+        A change is considered "distant" if:
+        - New lesions appear at sites distant from the primary/original site
+        - Multiple non-contiguous areas are involved
+        - There's mention of disseminated or widespread disease
+        
+        Provide your response in JSON format:
+        {{
+            "is_localized": true/false,
+            "has_distant_sites": true/false,
+            "locations": ["list of anatomical locations mentioned"],
+            "extent_description": "description of extent",
+            "evidence_sentences": ["list of relevant sentences"],
+            "confidence": 0.0-1.0,
+            "reasoning": "brief explanation"
+        }}
+        """
+    
+    async def validate(self, result: AgentResult, feedback: Dict[str, Any]) -> AgentResult:
+        """Validate extent analysis"""
+        # Update result based on feedback
+        if "extent_category" in feedback:
+            result.extracted_value["extent_category"] = feedback["extent_category"]
+            result.extracted_value["is_localized"] = feedback["extent_category"] == "localized"
+            result.extracted_value["has_distant_sites"] = feedback["extent_category"] == "distant"
+        
+        if "locations" in feedback:
+            result.extracted_value["locations"] = feedback["locations"]
+        
+        result.validation_status = "validated"
+        result.validated_value = result.extracted_value
+        result.validator_notes = feedback.get("notes", "")
+        
+        return result

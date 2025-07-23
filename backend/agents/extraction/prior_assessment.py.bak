@@ -1,0 +1,103 @@
+"""Agent for assessing suitable prior availability (Node 1)"""
+import json
+import re
+from typing import Tuple, Any, Dict, List
+
+from langchain.prompts import PromptTemplate
+from agents.base import BaseAgent
+from models.agent import MissingInfo
+
+class PriorAssessmentAgent(BaseAgent):
+    """Agent for determining if suitable prior imaging is available"""
+    
+    def __init__(self, **kwargs):
+        super().__init__(
+            agent_id="prior_assessment_agent",
+            node_id="node_1_suitable_prior",
+            **kwargs
+        )
+    
+    def _get_system_prompt(self) -> str:
+        return """You are a neuroradiology expert applying BT-RADS criteria for brain tumor follow-up.
+Your task is to determine if there is a suitable prior imaging study for comparison."""
+    
+    def _get_extraction_prompt(self) -> PromptTemplate:
+        return PromptTemplate(
+            input_variables=["clinical_note", "system_prompt"],
+            template="""{system_prompt}
+
+Clinical Note:
+{clinical_note}
+
+TASK: Determine if there is a suitable prior imaging study for BT-RADS comparison.
+
+BT-RADS requires a baseline study for comparison. Look for:
+- References to prior MRI scans
+- Comparison statements  
+- Baseline post-operative imaging
+- Previous follow-up studies
+
+Return your analysis in JSON format:
+{{
+    "available": "yes/no/unknown",
+    "reasoning": "explanation of prior imaging availability",
+    "confidence": 0.0-1.0,
+    "evidence": ["relevant quotes from the note"]
+}}"""
+        )
+    
+    def _parse_llm_response(self, response: str) -> Tuple[Any, str, float]:
+        """Parse JSON response from LLM"""
+        try:
+            # Extract JSON from response
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+                return (
+                    data.get("available", "unknown"),
+                    data.get("reasoning", "No reasoning provided"),
+                    float(data.get("confidence", 0.5))
+                )
+        except json.JSONDecodeError:
+            pass
+        
+        # Fallback parsing
+        if "yes" in response.lower() and "prior" in response.lower():
+            return ("yes", "Prior imaging mentioned in response", 0.7)
+        elif "no" in response.lower() and "prior" in response.lower():
+            return ("no", "No prior imaging mentioned", 0.7)
+        
+        return ("unknown", "Could not parse response", 0.3)
+    
+    def _validate_extraction(self, value: Any, context: Dict[str, Any]) -> bool:
+        """Validate the extraction"""
+        # Check if we have baseline date information
+        if value == "yes" and "baseline_date" in context:
+            return True
+        if value == "no" and "baseline_date" not in context:
+            return True
+        if value == "unknown":
+            return True
+        return False
+    
+    def _get_fallback_suggestion(self) -> str:
+        return "Review imaging history or assume no prior available (BT-0)"
+    
+    def _check_missing_info(
+        self,
+        extracted_value: Any,
+        confidence: float,
+        context: Dict[str, Any]
+    ) -> List[MissingInfo]:
+        """Check for missing information specific to prior assessment"""
+        missing = super()._check_missing_info(extracted_value, confidence, context)
+        
+        if extracted_value == "unknown":
+            missing.append(MissingInfo(
+                field="prior_imaging",
+                reason="Cannot determine if suitable prior imaging exists",
+                clinical_impact="May need to classify as BT-0 (Baseline)",
+                suggested_fallback="Assume prior available and continue algorithm"
+            ))
+        
+        return missing

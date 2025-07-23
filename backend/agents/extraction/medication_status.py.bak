@@ -1,0 +1,122 @@
+"""Agent for extracting medication status"""
+import json
+import re
+from typing import Tuple, Any, Dict, List
+
+from langchain.prompts import PromptTemplate
+from agents.base import BaseAgent
+from models.agent import MissingInfo
+
+class MedicationStatusAgent(BaseAgent):
+    """Agent for extracting current medication status"""
+    
+    def __init__(self, **kwargs):
+        super().__init__(
+            agent_id="medication_status_agent",
+            node_id="medication_status",
+            **kwargs
+        )
+    
+    def _get_system_prompt(self) -> str:
+        return """You are an expert medical data extractor specializing in brain tumor patient medication management.
+Your task is to extract CURRENT medication status with high precision."""
+    
+    def _get_extraction_prompt(self) -> PromptTemplate:
+        return PromptTemplate(
+            input_variables=["clinical_note", "system_prompt"],
+            template="""{system_prompt}
+
+Clinical Note:
+{clinical_note}
+
+Extract CURRENT medication status from the clinical note.
+
+STEROID STATUS - Look for dexamethasone, decadron, prednisolone, prednisone:
+- 'none': Patient is not currently on steroids
+- 'stable': Patient continues on same steroid dose  
+- 'increasing': Steroid dose being increased/escalated
+- 'decreasing': Steroid dose being tapered/decreased
+- 'started': Patient newly started on steroids
+- 'unknown': Cannot determine from available information
+
+AVASTIN STATUS - Look for Avastin, bevacizumab, BV, anti-angiogenic therapy:
+- 'none': Patient is not on Avastin therapy
+- 'ongoing': Patient continuing established Avastin therapy
+- 'first_treatment': This is clearly the patient's first Avastin dose/cycle
+- 'started': Recently started Avastin therapy  
+- 'unknown': Cannot determine from available information
+
+Focus on CURRENT status only. Be conservative - use 'unknown' if uncertain.
+
+Return ONLY: {{"steroid_status": "X", "avastin_status": "Y"}}"""
+        )
+    
+    def _parse_llm_response(self, response: str) -> Tuple[Any, str, float]:
+        """Parse JSON response from LLM"""
+        try:
+            # Extract JSON from response
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+                
+                result = {
+                    "steroid_status": data.get("steroid_status", "unknown"),
+                    "avastin_status": data.get("avastin_status", "unknown")
+                }
+                
+                # Calculate confidence based on how many unknowns
+                unknown_count = sum(1 for v in result.values() if v == "unknown")
+                confidence = 1.0 - (unknown_count * 0.4)
+                
+                reasoning = f"Steroid status: {result['steroid_status']}, Avastin status: {result['avastin_status']}"
+                
+                return (result, reasoning, confidence)
+        except json.JSONDecodeError:
+            pass
+        
+        return ({"steroid_status": "unknown", "avastin_status": "unknown"}, 
+                "Could not parse medication status", 0.3)
+    
+    def _validate_extraction(self, value: Any, context: Dict[str, Any]) -> bool:
+        """Validate the extraction"""
+        if not isinstance(value, dict):
+            return False
+        
+        valid_steroid_status = ["none", "stable", "increasing", "decreasing", "started", "unknown"]
+        valid_avastin_status = ["none", "ongoing", "first_treatment", "started", "unknown"]
+        
+        steroid_valid = value.get("steroid_status") in valid_steroid_status
+        avastin_valid = value.get("avastin_status") in valid_avastin_status
+        
+        return steroid_valid and avastin_valid
+    
+    def _get_fallback_suggestion(self) -> str:
+        return "Assume no medication effects (neither steroids nor Avastin)"
+    
+    def _check_missing_info(
+        self,
+        extracted_value: Any,
+        confidence: float,
+        context: Dict[str, Any]
+    ) -> List[MissingInfo]:
+        """Check for missing medication information"""
+        missing = super()._check_missing_info(extracted_value, confidence, context)
+        
+        if isinstance(extracted_value, dict):
+            if extracted_value.get("steroid_status") == "unknown":
+                missing.append(MissingInfo(
+                    field="steroid_status",
+                    reason="Current steroid status not found in clinical note",
+                    clinical_impact="May affect BT-1a vs BT-1b decision if imaging improved",
+                    suggested_fallback="Assume no steroids"
+                ))
+            
+            if extracted_value.get("avastin_status") == "unknown":
+                missing.append(MissingInfo(
+                    field="avastin_status",
+                    reason="Current Avastin status not found in clinical note",
+                    clinical_impact="May affect BT-1a vs BT-1b decision if imaging improved",
+                    suggested_fallback="Assume no Avastin"
+                ))
+        
+        return missing
