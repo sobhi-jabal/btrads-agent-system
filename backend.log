@@ -1,0 +1,86 @@
+INFO:     Started server process [79540]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+Starting BT-RADS Mock Backend on http://localhost:8000
+API Documentation available at http://localhost:8000/docs
+INFO:     127.0.0.1:49521 - "GET / HTTP/1.1" 200 OK
+Received file: test_upload.csv
+Parsed 2 patients from CSV
+INFO:     127.0.0.1:49633 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49657 - "GET /api/patients HTTP/1.1" 200 OK
+Received file: input_file_id (version 1) - (Run) - (mL) - (Pre-UI) - (Sample).csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:49680 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49699 - "GET /api/patients HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:49880 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49880 - "OPTIONS /api/patients/PAT_20250731093835_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49880 - "POST /api/patients/PAT_20250731093835_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50568 - "GET /api/patients HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:50602 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50602 - "OPTIONS /api/patients/PAT_20250731094822_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50602 - "POST /api/patients/PAT_20250731094822_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50738 - "GET /api/patients HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50762 - "GET /api/patients/PAT_20250731094822_000 HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:50854 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50854 - "OPTIONS /api/patients/PAT_20250731095505_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50854 - "POST /api/patients/PAT_20250731095505_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50854 - "GET /api/patients/PAT_20250731095505_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50859 - "POST /api/patients/PAT_20250731095505_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51258 - "GET /api/patients/PAT_20250731095505_000 HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:51687 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51687 - "OPTIONS /api/patients/PAT_20250731101655_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51687 - "POST /api/patients/PAT_20250731101655_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51687 - "GET /api/patients/PAT_20250731101655_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51687 - "POST /api/patients/PAT_20250731101655_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52107 - "GET /api/patients/PAT_20250731101655_000 HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:52583 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52583 - "OPTIONS /api/patients/PAT_20250731103114_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52583 - "POST /api/patients/PAT_20250731103114_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52583 - "GET /api/patients/PAT_20250731103114_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52583 - "POST /api/patients/PAT_20250731103114_000/process?auto_validate=false HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:53169 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53169 - "OPTIONS /api/patients/PAT_20250731104319_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53169 - "POST /api/patients/PAT_20250731104319_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53169 - "GET /api/patients/PAT_20250731104319_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53169 - "POST /api/patients/PAT_20250731104319_000/process?auto_validate=false HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:54480 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54480 - "OPTIONS /api/patients/PAT_20250731110722_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54480 - "POST /api/patients/PAT_20250731110722_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54480 - "GET /api/patients/PAT_20250731110722_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54480 - "POST /api/patients/PAT_20250731110722_000/process?auto_validate=false HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:54662 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54662 - "OPTIONS /api/patients/PAT_20250731111322_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54662 - "POST /api/patients/PAT_20250731111322_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54662 - "GET /api/patients/PAT_20250731111322_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54662 - "POST /api/patients/PAT_20250731111322_000/process?auto_validate=false HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:54949 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54949 - "OPTIONS /api/patients/PAT_20250731111904_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54949 - "POST /api/patients/PAT_20250731111904_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54949 - "GET /api/patients/PAT_20250731111904_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54949 - "POST /api/patients/PAT_20250731111904_000/process?auto_validate=false HTTP/1.1" 200 OK
+Received file: validated_data.csv
+Parsed 20 patients from CSV
+INFO:     127.0.0.1:55446 - "POST /api/patients/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55446 - "OPTIONS /api/patients/PAT_20250731112401_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55446 - "POST /api/patients/PAT_20250731112401_000/process?auto_validate=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55446 - "GET /api/patients/PAT_20250731112401_000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55446 - "POST /api/patients/PAT_20250731112401_000/process?auto_validate=false HTTP/1.1" 200 OK

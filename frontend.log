@@ -1,0 +1,437 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.4.2
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.86.21:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1412ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.2s (1191 modules)
+ GET / 200 in 2555ms
+ ✓ Compiled in 153ms (509 modules)
+ GET / 200 in 33ms
+ GET / 200 in 31ms
+ ○ Compiling /patient/[id] ...
+ ✓ Compiled /patient/[id] in 2.3s (2273 modules)
+ GET /patient/PAT_20250731093617_000 200 in 3026ms
+ GET / 200 in 78ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 570ms (1749 modules)
+ GET /favicon.ico 200 in 640ms
+ GET /favicon.ico 200 in 637ms
+ GET /favicon.ico 200 in 650ms
+ GET /apple-touch-icon-precomposed.png 404 in 642ms
+ GET /apple-touch-icon-precomposed.png 404 in 836ms
+ GET /apple-touch-icon.png 404 in 640ms
+ GET /apple-touch-icon.png 404 in 20ms
+ ✓ Compiled in 351ms (1059 modules)
+ GET / 200 in 23ms
+ ✓ Compiled in 249ms (1059 modules)
+ GET / 200 in 14ms
+ ✓ Compiled in 669ms (1566 modules)
+ GET / 200 in 92ms
+ ✓ Compiled in 862ms (1577 modules)
+ GET / 200 in 57ms
+ ✓ Compiled in 393ms (1577 modules)
+ GET / 200 in 33ms
+ ✓ Compiled in 234ms (1063 modules)
+ GET / 200 in 18ms
+ ✓ Compiled in 311ms (1577 modules)
+ GET / 200 in 39ms
+ ✓ Compiled in 373ms (1577 modules)
+ GET / 200 in 113ms
+ ✓ Compiled in 775ms (1581 modules)
+ GET / 200 in 165ms
+ GET / 200 in 49ms
+ GET / 200 in 76ms
+ ✓ Compiled in 693ms (1567 modules)
+ GET / 200 in 228ms
+ GET / 200 in 74ms
+ ✓ Compiled in 637ms (1581 modules)
+ GET / 200 in 72ms
+ ✓ Compiled in 324ms (1581 modules)
+ GET / 200 in 51ms
+ ✓ Compiled in 428ms (1581 modules)
+ GET / 200 in 37ms
+ ✓ Compiled in 326ms (1581 modules)
+ GET / 200 in 38ms
+ ✓ Compiled in 620ms (1581 modules)
+ ✓ Compiled in 397ms (1581 modules)
+ ✓ Compiled in 214ms (1581 modules)
+ ✓ Compiled in 390ms (1581 modules)
+ ✓ Compiled in 775ms (1581 modules)
+ ✓ Compiled in 480ms (1581 modules)
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'confidenceLevel' has already been declared (679:20)
+|                 // Clinical reasoning algorithm
+|                 let likelySteroidsEffect;
+>                 let confidenceLevel;
+|                 let steroidImpact;
+|                 if (hasHighDoseSteroids || hasRecentSteroidStart && !hasTumorResponse) {
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled in 347ms (1581 modules)
+ ✓ Compiled in 222ms (1581 modules)
+ ✓ Compiled in 244ms (1581 modules)
+ ✓ Compiled in 314ms (1581 modules)
+ GET / 200 in 222ms
+ GET / 200 in 17ms
+ GET / 200 in 13ms
+ GET / 200 in 9ms
+ GET / 200 in 14ms
+ GET / 200 in 12ms
+ GET / 200 in 14ms
+ GET / 200 in 10ms
+ GET / 200 in 11ms
+ GET / 200 in 14ms
+ GET / 200 in 124ms
+ ✓ Compiled in 381ms (1065 modules)
+ GET / 200 in 30ms
+ ✓ Compiled in 157ms (1065 modules)
+ GET / 200 in 11ms
+ ✓ Compiled in 177ms (1065 modules)
+ GET / 200 in 12ms
+ ✓ Compiled in 164ms (1065 modules)
+ GET / 200 in 17ms
+ ✓ Compiled in 212ms (1065 modules)
+ GET / 200 in 15ms
+ ✓ Compiled in 629ms (1581 modules)
+ GET / 200 in 66ms
+ ✓ Compiled in 294ms (1581 modules)
+ GET / 200 in 29ms
+ ✓ Compiled in 355ms (1581 modules)
+ GET / 200 in 34ms
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'criteria' has already been declared (453:22)
+|                 else if (onSteroids) medicationPath = 'steroids';
+|                 // Create decision criteria for audit trail
+>                 const criteria = [
+|                     {
+|                         id: 'avastin-detected',
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'criteria' has already been declared (453:22)
+|                 else if (onSteroids) medicationPath = 'steroids';
+|                 // Create decision criteria for audit trail
+>                 const criteria = [
+|                     {
+|                         id: 'avastin-detected',
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'alternativePaths' has already been declared (477:22)
+|                 ];
+|                 // Alternative paths
+>                 const alternativePaths = [];
+|                 if (onAvastin && !onSteroids) {
+|                     alternativePaths.push({
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'decisionPoint' has already been declared (507:22)
+|                 }
+|                 // Create decision point for audit trail
+>                 const decisionPoint = {
+|                     id: "decision-".concat(step.nodeId),
+|                     nodeId: step.nodeId,
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'decisionPoint' has already been declared (507:22)
+|                 }
+|                 // Create decision point for audit trail
+>                 const decisionPoint = {
+|                     id: "decision-".concat(step.nodeId),
+|                     nodeId: step.nodeId,
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'confidence' has already been declared (530:22)
+|                 }
+|                 // Create confidence assessment
+>                 const confidence = createConfidenceData(evidence.length > 2 ? 90 : evidence.length > 0 ? 70 : 40, extractedMeds.length > 0 ? 95 : 80, onAvastin || onSteroids ? 90 : 60, 85, "Medication analysis based on ".concat(evidence.length, " evidence items and ").concat(extractedMeds.length, " extracted medication mentions"), evidence.length === 0 ? [
+|                     'No explicit medication patterns found - relying on general clinical context'
+|                 ] : [], onAvastin && onSteroids ? [
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'verificationItems' has already been declared (536:22)
+|                 ] : []);
+|                 // Create verification items for expert review
+>                 const verificationItems = [
+|                     {
+|                         id: "verify-medications-".concat(step.nodeId),
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'verificationItems' has already been declared (536:22)
+|                 ] : []);
+|                 // Create verification items for expert review
+>                 const verificationItems = [
+|                     {
+|                         id: "verify-medications-".concat(step.nodeId),
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled in 1023ms (1581 modules)
+ GET / 200 in 107ms
+ ✓ Compiled in 350ms (1581 modules)
+ GET / 200 in 59ms
+ ✓ Compiled in 647ms (1622 modules)
+ GET / 200 in 37ms
+ GET / 200 in 189ms
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'flairAbsoluteChange' has already been declared (685:22)
+|                 ;
+|                 // Absolute volume changes for context
+>                 const flairAbsoluteChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data17 = patient.data) === null || _patient_data17 === void 0 ? void 0 : _patient_data17.followup_flair_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data18 = patient.data) === null || _patient_data18 === void 0 ? void 0 : _patient_data18.baseline_flair_volume) || '0');
+|                 const enhAbsoluteChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data19 = patient.data) === null || _patient_data19 === void 0 ? void 0 : _patient_data19.followup_enhancement_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data20 = patient.data) === null || _patient_data20 === void 0 ? void 0 : _patient_data20.baseline_enhancement_volume) || '0');
+|                 // Mixed pattern analysis - important for BT-RADS classification
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'flairAbsoluteChange' has already been declared (685:22)
+|                 ;
+|                 // Absolute volume changes for context
+>                 const flairAbsoluteChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data17 = patient.data) === null || _patient_data17 === void 0 ? void 0 : _patient_data17.followup_flair_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data18 = patient.data) === null || _patient_data18 === void 0 ? void 0 : _patient_data18.baseline_flair_volume) || '0');
+|                 const enhAbsoluteChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data19 = patient.data) === null || _patient_data19 === void 0 ? void 0 : _patient_data19.followup_enhancement_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data20 = patient.data) === null || _patient_data20 === void 0 ? void 0 : _patient_data20.baseline_enhancement_volume) || '0');
+|                 // Mixed pattern analysis - important for BT-RADS classification
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'flairAbsChange' has already been declared (746:22)
+|                 ;
+|                 // Volume-based analysis
+>                 const flairAbsChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data25 = patient.data) === null || _patient_data25 === void 0 ? void 0 : _patient_data25.followup_flair_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data26 = patient.data) === null || _patient_data26 === void 0 ? void 0 : _patient_data26.baseline_flair_volume) || '0');
+|                 const enhAbsChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data27 = patient.data) === null || _patient_data27 === void 0 ? void 0 : _patient_data27.followup_enhancement_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data28 = patient.data) === null || _patient_data28 === void 0 ? void 0 : _patient_data28.baseline_enhancement_volume) || '0');
+|                 const maxAbsChange = Math.max(Math.abs(flairAbsChange), Math.abs(enhAbsChange));
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'flairAbsChange' has already been declared (746:22)
+|                 ;
+|                 // Volume-based analysis
+>                 const flairAbsChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data25 = patient.data) === null || _patient_data25 === void 0 ? void 0 : _patient_data25.followup_flair_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data26 = patient.data) === null || _patient_data26 === void 0 ? void 0 : _patient_data26.baseline_flair_volume) || '0');
+|                 const enhAbsChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data27 = patient.data) === null || _patient_data27 === void 0 ? void 0 : _patient_data27.followup_enhancement_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data28 = patient.data) === null || _patient_data28 === void 0 ? void 0 : _patient_data28.baseline_enhancement_volume) || '0');
+|                 const maxAbsChange = Math.max(Math.abs(flairAbsChange), Math.abs(enhAbsChange));
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'flairAbsChange' has already been declared (746:22)
+|                 ;
+|                 // Volume-based analysis
+>                 const flairAbsChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data25 = patient.data) === null || _patient_data25 === void 0 ? void 0 : _patient_data25.followup_flair_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data26 = patient.data) === null || _patient_data26 === void 0 ? void 0 : _patient_data26.baseline_flair_volume) || '0');
+|                 const enhAbsChange = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data27 = patient.data) === null || _patient_data27 === void 0 ? void 0 : _patient_data27.followup_enhancement_volume) || '0') - parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data28 = patient.data) === null || _patient_data28 === void 0 ? void 0 : _patient_data28.baseline_enhancement_volume) || '0');
+|                 const maxAbsChange = Math.max(Math.abs(flairAbsChange), Math.abs(enhAbsChange));
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled in 1084ms (1622 modules)
+ GET / 200 in 95ms
+ ✓ Compiled in 471ms (1622 modules)
+ GET / 200 in 61ms
+ ✓ Compiled in 300ms (1622 modules)
+ GET / 200 in 38ms
+ ✓ Compiled in 310ms (1622 modules)
+ GET / 200 in 41ms
+ ✓ Compiled in 911ms (1622 modules)
+ GET / 200 in 101ms
+ ✓ Compiled in 562ms (1622 modules)
+ GET / 200 in 38ms
+ ✓ Compiled in 244ms (1622 modules)
+ GET / 200 in 36ms
+ GET / 200 in 204ms
+ ✓ Compiled in 692ms (1622 modules)
+ ✓ Compiled in 382ms (1622 modules)
+ ✓ Compiled in 486ms (1622 modules)
+ ✓ Compiled in 450ms (1622 modules)
+ ✓ Compiled in 529ms (1622 modules)
+ ✓ Compiled in 672ms (1622 modules)
+ ✓ Compiled in 322ms (1622 modules)
+ ✓ Compiled in 328ms (1622 modules)
+ ✓ Compiled in 969ms (1622 modules)
+ ✓ Compiled in 262ms (1622 modules)
+ ✓ Compiled in 262ms (1622 modules)
+ ✓ Compiled in 372ms (1622 modules)
+ ✓ Compiled in 236ms (1622 modules)
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ○ Compiling /_error ...
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ GET / 500 in 2583ms
+ GET / 500 in 586ms
+ GET / 500 in 10ms
+ GET / 500 in 22ms
+ GET / 500 in 38ms
+ GET / 500 in 21ms
+ GET / 500 in 14ms
+ GET / 500 in 20ms
+ GET / 500 in 97ms
+ GET / 500 in 21ms
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (677:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ GET / 500 in 460ms
+ GET /_next/static/webpack/2821fdf0725cc226.webpack.hot-update.json 500 in 463ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 500 in 22ms
+ GET / 500 in 22ms
+ GET / 500 in 14ms
+ GET / 500 in 6ms
+ GET / 500 in 7ms
+ GET /apple-touch-icon-precomposed.png 500 in 55ms
+ GET /apple-touch-icon.png 500 in 53ms
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (667:22)
+|                 const enhChangePercent = parseFloat(patient?.data?.enhancement_change_percentage || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'MEASURABLE_DISEASE_THRESHOLD' has already been declared (679:22)
+|                 const enhChangePercent = parseFloat((patient === null || patient === void 0 ? void 0 : (_patient_data16 = patient.data) === null || _patient_data16 === void 0 ? void 0 : _patient_data16.enhancement_change_percentage) || '0');
+|                 // Enhanced threshold analysis - requires both percentage AND absolute thresholds
+>                 const MEASURABLE_DISEASE_THRESHOLD = 1.0 // 1 mL = 1×1×1 cm
+|                 ;
+|                 const flairWorse = flairChangePercent > 15 && Math.abs(flairAbsChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled /favicon.ico in 909ms (1950 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ○ Compiling /_not-found ...
+ GET / 200 in 325ms
+ ✓ Compiled /_not-found in 721ms (1941 modules)
+ ✓ Compiled in 587ms (1955 modules)
+ GET / 200 in 87ms
+ GET / 200 in 134ms
+ ✓ Compiled in 786ms (1950 modules)
+ GET / 200 in 69ms
+ GET / 200 in 206ms
+ ✓ Compiled in 728ms (1950 modules)
+ GET / 200 in 70ms
+ GET / 200 in 111ms
+ ⨯ ./components/flow/BTRADSDecisionFlow.tsx
+Module parse failed: Identifier 'flairImproved' has already been declared (325:22)
+|                 ];
+|                 // For significant change, must meet BOTH percentage AND absolute thresholds
+>                 const flairImproved = flairChange < -10 && Math.abs(flairAbsoluteChange) >= MEASURABLE_DISEASE_THRESHOLD;
+|                 const enhImproved = enhChange < -10 && Math.abs(enhAbsoluteChange) >= MEASURABLE_DISEASE_THRESHOLD;
+|                 const flairWorsened = flairChange > 10 && Math.abs(flairAbsoluteChange) >= MEASURABLE_DISEASE_THRESHOLD;
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled in 533ms (1950 modules)
+ ✓ Compiled in 280ms (1950 modules)
+ GET / 200 in 223ms
+ GET / 200 in 17ms
+ GET / 200 in 118ms

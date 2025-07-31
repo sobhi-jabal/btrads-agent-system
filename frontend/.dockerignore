@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.gitignore
+*.log
+.DS_Store
+.env*.local
+coverage
+.nyc_output
+.cache
+dist
+.vscode
+.idea
