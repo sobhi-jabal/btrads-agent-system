@@ -9,7 +9,7 @@ import logging
 from typing import Dict
 import asyncio
 
-from api.routes import patients, agents, validation, reports
+from api.routes import patients, agents, validation, reports, llm
 from services.websocket_manager import WebSocketManager
 from services.patient_service import PatientService
 from agents.orchestration.agent_orchestrator import AgentOrchestrator
@@ -64,6 +64,7 @@ app.include_router(patients.router, prefix="/api/patients", tags=["patients"])
 app.include_router(agents.router, prefix="/api/agents", tags=["agents"])
 app.include_router(validation.router, prefix="/api/validation", tags=["validation"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
+app.include_router(llm.router, prefix="/api/llm", tags=["llm"])
 
 @app.get("/")
 async def root():

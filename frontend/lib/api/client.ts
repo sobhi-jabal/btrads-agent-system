@@ -116,6 +116,27 @@ export const api = {
       const { data } = await apiClient.get(`/api/reports/${patientId}/audit-trail`)
       return data.audit_trail
     }
+  },
+  
+  llm: {
+    extract: async (request: {
+      clinical_note: string
+      extraction_type: 'medications' | 'radiation_date'
+      model?: string
+    }) => {
+      const { data } = await apiClient.post('/api/llm/extract', request)
+      return data
+    },
+    
+    getModels: async () => {
+      const { data } = await apiClient.get('/api/llm/models')
+      return data
+    },
+    
+    checkStatus: async () => {
+      const { data } = await apiClient.get('/api/llm/status')
+      return data
+    }
   }
 }
 

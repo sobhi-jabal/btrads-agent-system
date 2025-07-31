@@ -17,7 +17,10 @@ import {
   Database,
   FileText,
   Stethoscope,
-  Activity
+  Activity,
+  Zap,
+  Brain,
+  Loader2
 } from "lucide-react"
 import { getBTRADSNodes, getBTRADSEdges } from '@/lib/flowchart/flowchart-config'
 import { ConnectionLine } from './ConnectionLine'
@@ -27,6 +30,15 @@ import { CalculationBreakdown, type CalculationStep } from '@/components/evidenc
 import { ConfidenceIndicator, type ConfidenceData } from '@/components/evidence/ConfidenceIndicator'
 import { DecisionAuditTrail, type DecisionPoint, type DecisionCriteria, type AlternativePath } from '@/components/evidence/DecisionAuditTrail'
 import { ManualVerificationPanel, type VerificationItem } from '@/components/evidence/ManualVerificationPanel'
+import { BTRADSFinalScore } from './BTRADSFinalScore'
+import { 
+  extractDataPoints, 
+  extractMedicationsNLP, 
+  extractRadiationDateNLP,
+  type ExtractionMode,
+  type ExtractionResult 
+} from './ExtractionFunctions'
+import { ExtractionComparison } from './BTRADSComparisonView'
 
 // BT-RADS Measurable Disease Threshold: 1 mL = 1×1×1 cm
 const MEASURABLE_DISEASE_THRESHOLD = 1.0
@@ -34,6 +46,14 @@ const MEASURABLE_DISEASE_THRESHOLD = 1.0
 interface BTRADSDecisionFlowProps {
   patientId: string
   onProcessingComplete?: (result: any) => void
+  autoStart?: boolean
+  onProcessNext?: () => void
+  onProcessPrevious?: () => void
+  hasNextPatient?: boolean
+  hasPreviousPatient?: boolean
+  remainingCount?: number
+  completedCount?: number
+  extractionMode?: ExtractionMode
 }
 
 interface ProcessingStep {
@@ -53,7 +73,18 @@ interface ProcessingStep {
   verificationItems?: VerificationItem[]
 }
 
-export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDecisionFlowProps) {
+export function BTRADSDecisionFlow({ 
+  patientId, 
+  onProcessingComplete, 
+  autoStart = false,
+  onProcessNext,
+  onProcessPrevious,
+  hasNextPatient,
+  hasPreviousPatient,
+  remainingCount,
+  completedCount,
+  extractionMode = 'both'
+}: BTRADSDecisionFlowProps) {
   const [processingSteps, setProcessingSteps] = useState<ProcessingStep[]>([])
   const [currentStep, setCurrentStep] = useState<number>(0)
   const [patientData, setPatientData] = useState<any>(null)
@@ -61,6 +92,9 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set())
   const [transparencyLevel, setTransparencyLevel] = useState<'simple' | 'detailed' | 'expert' | 'audit'>('detailed')
   const [decisionTrail, setDecisionTrail] = useState<DecisionPoint[]>([])
+  const [autoAdvance, setAutoAdvance] = useState(false)
+  // extractionMode is now passed as a prop
+  const [extractionResults, setExtractionResults] = useState<ExtractionResult>({})
 
   // Initialize with flowchart nodes
   useEffect(() => {
@@ -91,6 +125,14 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
       try {
         const patient = await api.patients.getById(patientId)
         setPatientData(patient)
+        
+        // Auto-start processing if enabled
+        if (autoStart && !isProcessing) {
+          // Small delay to let UI render first
+          setTimeout(() => {
+            startProcessing()
+          }, 500)
+        }
       } catch (error) {
         console.error('Error loading patient data:', error)
       }
@@ -106,6 +148,12 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
     setCurrentStep(0)
     
     try {
+      // Extract data points first if we have clinical note
+      if (patientData?.data?.clinical_note) {
+        const results = await extractDataPoints(patientData.data.clinical_note, extractionMode)
+        setExtractionResults(results)
+      }
+      
       // Start the actual processing
       await api.patients.startProcessing(patientId, false)
       
@@ -140,8 +188,10 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
         index === stepIndex ? { ...step, status: 'processing' } : step
       ))
       
-      // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Simulate processing delay with variable timing based on step type
+      const processingTime = processingSteps[stepIndex].type === 'data-extraction' ? 1500 : 
+                           processingSteps[stepIndex].type === 'decision' ? 1000 : 500
+      await new Promise(resolve => setTimeout(resolve, processingTime))
       
       // Update step with results
       const processedStep = await processStep(processingSteps[stepIndex], patientData)
@@ -157,6 +207,17 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
       if (processedStep.type === 'outcome' && processedStep.status === 'completed') {
         // Expand the final outcome step
         setExpandedSteps(prev => new Set([...prev, stepIndex]))
+        
+        // Call onProcessingComplete callback with result
+        if (onProcessingComplete) {
+          onProcessingComplete({
+            btradsScore: processedStep.btradsScore,
+            reasoning: processedStep.reasoning,
+            steps: processingSteps,
+            patientId
+          })
+        }
+        
         break
       }
     }
@@ -727,12 +788,45 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
       case 'node_4_time_since_xrt':
         // Enhanced radiation timeline analysis with comprehensive pattern matching
         const clinicalNoteRad = patient?.data?.clinical_note?.toLowerCase() || ''
+        const originalNoteRad = patient?.data?.clinical_note || ''
         
-        // Enhanced radiation detection patterns
+        // Enhanced radiation detection patterns with date focus
+        // Date range patterns to capture start and end dates
+        const radiationDateRangePatterns = [
+          /radiation.*?(\d{1,2}\/\d{1,2}\/\d{2,4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
+          /(?:xrt|radiotherapy).*?(\d{1,2}\/\d{1,2}\/\d{2,4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
+          /(\d{1,2}\/\d{1,2}\/\d{2,4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{2,4}).*?(?:radiation|xrt|radiotherapy)/gi
+        ]
+        
+        // Single date patterns as fallback
+        const radiationDatePatterns = [
+          /radiation.*?(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
+          /(?:xrt|radiotherapy).*?(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
+          /(\d{1,2}\/\d{1,2}\/\d{2,4}).*?radiation/gi,
+          /(\d{1,2}\/\d{1,2}\/\d{2,4}).*?(?:xrt|radiotherapy)/gi
+        ]
+        
         const radiationPatterns = [
-          /radiation\s*therapy/gi, /radiotherapy/gi, /xrt/gi, /rt\s/gi,
-          /stereotactic/gi, /gamma\s*knife/gi, /cyber\s*knife/gi,
-          /fractionated/gi, /hypofractionated/gi, /radiosurgery/gi
+          /radiation\s*therapy/gi, 
+          /radiotherapy/gi, 
+          /\bxrt\b/gi,  // Word boundaries to avoid matching within words
+          /\brt\b/gi,   // Word boundaries to avoid matching "Robert" etc
+          /stereotactic\s*(?:radio|radiation|radiosurgery)/gi,  // Only radiation-related stereotactic
+          /gamma\s*knife/gi, 
+          /cyber\s*knife/gi,
+          /fractionated\s*radiation/gi,  // More specific to radiation
+          /hypofractionated\s*radiation/gi,  // More specific to radiation
+          /radiosurgery/gi,
+          ...radiationDateRangePatterns,  // Include date range patterns first
+          ...radiationDatePatterns  // Include single date patterns as fallback
+        ]
+        
+        const radiationPatternNames = [
+          'Radiation therapy', 'Radiotherapy', 'XRT', 'RT', 
+          'Stereotactic radiation', 'Gamma Knife', 'CyberKnife',
+          'Fractionated radiation', 'Hypofractionated radiation', 'Radiosurgery',
+          'Radiation with date range', 'XRT/Radiotherapy with date range', 'Date range before radiation',
+          'Radiation with date', 'XRT/Radiotherapy with date', 'Date before radiation', 'Date before XRT/radiotherapy'
         ]
         const radiationMentioned = radiationPatterns.some(pattern => pattern.test(clinicalNoteRad))
         
@@ -743,11 +837,76 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
         const hasRecentIndicators = recentRadKeywords.test(clinicalNoteRad)
         const hasDistantIndicators = distantRadKeywords.test(clinicalNoteRad)
         
+        // Create evidence items for radiation patterns
+        const radiationEvidence = createEvidence(
+          originalNoteRad, 
+          radiationPatterns, 
+          'radiation',
+          radiationPatternNames
+        )
+        
+        // Create evidence for temporal indicators
+        const temporalPatterns = [recentRadKeywords, distantRadKeywords]
+        const temporalPatternNames = ['Recent indicators', 'Distant indicators']
+        const temporalEvidence = createEvidence(
+          originalNoteRad,
+          temporalPatterns,
+          'temporal',
+          temporalPatternNames
+        )
+        
+        // Combine all evidence
+        const evidenceRad = [...radiationEvidence, ...temporalEvidence]
+        
+        // Try to extract actual radiation dates
+        let extractedRadiationDate: Date | null = null
+        
+        // First try to find date ranges (use end date)
+        for (const pattern of radiationDateRangePatterns) {
+          const match = originalNoteRad.match(pattern)
+          if (match && match[2]) {  // match[2] is the end date in the range
+            try {
+              const testDate = new Date(match[2])
+              // Check if date is valid
+              if (!isNaN(testDate.getTime())) {
+                extractedRadiationDate = testDate
+                break
+              }
+            } catch (e) {
+              // Invalid date format, continue
+            }
+          }
+        }
+        
+        // If no date range found, try single dates
+        if (!extractedRadiationDate) {
+          for (const pattern of radiationDatePatterns) {
+            const match = originalNoteRad.match(pattern)
+            if (match && match[1]) {
+              try {
+                const testDate = new Date(match[1])
+                // Check if date is valid
+                if (!isNaN(testDate.getTime())) {
+                  extractedRadiationDate = testDate
+                  break
+                }
+              } catch (e) {
+                // Invalid date format, continue
+              }
+            }
+          }
+        }
+        
         // Enhanced timeline estimation based on clinical context
         let daysSinceXRT: number
         let confidenceLevel: string
         
-        if (hasRecentIndicators && !hasDistantIndicators) {
+        // If we have an actual radiation date and a follow-up date, calculate precisely
+        if (extractedRadiationDate && patient?.data?.followup_date) {
+          const followupDate = new Date(patient.data.followup_date)
+          daysSinceXRT = Math.floor((followupDate.getTime() - extractedRadiationDate.getTime()) / (1000 * 60 * 60 * 24))
+          confidenceLevel = 'Very High - extracted exact radiation date'
+        } else if (hasRecentIndicators && !hasDistantIndicators) {
           daysSinceXRT = 45 // Recent radiation
           confidenceLevel = 'High - recent temporal indicators'
         } else if (hasDistantIndicators && !hasRecentIndicators) {
@@ -793,12 +952,17 @@ export function BTRADSDecisionFlow({ patientId, onProcessingComplete }: BTRADSDe
             hasRecentIndicators,
             hasDistantIndicators,
             confidenceLevel,
+            extractedRadiationDate: extractedRadiationDate && !isNaN(extractedRadiationDate.getTime()) 
+              ? extractedRadiationDate.toISOString().split('T')[0] 
+              : null,
             timeCategory: isRecent ? '< 90 days (Recent)' : '≥ 90 days (Distant)',
-            radiationType: clinicalNoteRad.includes('stereotactic') ? 'Stereotactic' :
+            radiationType: clinicalNoteRad.includes('stereotactic') && clinicalNoteRad.includes('radio') ? 'Stereotactic' :
                           clinicalNoteRad.includes('gamma') ? 'Gamma Knife' :
-                          clinicalNoteRad.includes('cyber') ? 'CyberKnife' : 'Standard RT'
+                          clinicalNoteRad.includes('cyber') ? 'CyberKnife' : 
+                          radiationMentioned ? 'Standard RT' : 'None detected'
           },
           reasoning: radiationAnalysis,
+          evidence: evidenceRad,
           nextNode: isRecent ? 'outcome_bt_3a' : 'node_5_what_is_worse'
         }
       
@@ -1415,8 +1579,8 @@ Conclusion: ${likelySteroidsEffect ?
 
   return (
     <div className="space-y-4">
-      {/* Patient Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
+        {/* Patient Header */}
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -1424,9 +1588,16 @@ Conclusion: ${likelySteroidsEffect ?
                 <FileText className="h-5 w-5 text-blue-600" />
                 Patient {patientData.data?.patient_id}
               </CardTitle>
-              <CardDescription>
-                BT-RADS Decision Flow Analysis with Full Transparency
-              </CardDescription>
+              <div className="space-y-1">
+                <CardDescription>
+                  BT-RADS Decision Flow Analysis with Full Transparency
+                </CardDescription>
+                {extractionMode !== 'nlp' && (
+                  <Badge variant="secondary">
+                    {extractionMode === 'llm' ? 'LLM Extraction' : 'Dual Extraction'}
+                  </Badge>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {/* Transparency Level Controls */}
@@ -1452,7 +1623,78 @@ Conclusion: ${likelySteroidsEffect ?
             </div>
           </div>
         </CardHeader>
+        
+        {/* Progress Indicator */}
+        {(isProcessing || processingSteps.some(s => s.status !== 'pending')) && (
+          <CardContent className="pt-0 pb-4">
+            <div className="space-y-2">
+              {(() => {
+                // Check if processing is complete (reached an outcome node)
+                const isComplete = processingSteps.some(s => 
+                  s.type === 'outcome' && s.status === 'completed'
+                )
+                
+                // Count steps that have been processed or are processing
+                const activeSteps = processingSteps.filter(s => s.status !== 'pending')
+                const completedSteps = activeSteps.filter(s => s.status === 'completed').length
+                const totalActiveSteps = activeSteps.length
+                
+                // Progress calculation based on actual path
+                let progressPercentage: number
+                let progressText: string
+                
+                if (isComplete) {
+                  progressPercentage = 100
+                  progressText = `Processing Complete (${totalActiveSteps} steps)`
+                } else if (totalActiveSteps === 0) {
+                  progressPercentage = 0
+                  progressText = 'Starting...'
+                } else {
+                  // Show progress based on completed steps out of active steps
+                  progressPercentage = Math.max(5, Math.min(95, (completedSteps / (totalActiveSteps + 1)) * 100))
+                  progressText = `Step ${completedSteps + 1} of ${totalActiveSteps + 1}`
+                }
+                
+                return (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Processing Progress</span>
+                      <span className="font-medium">
+                        {progressText}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-600 transition-all duration-500 ease-out relative"
+                        style={{
+                          width: `${progressPercentage}%`
+                        }}
+                      >
+                        {!isComplete && isProcessing && (
+                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )
+              })()}
+              {autoStart && !isProcessing && processingSteps.every(s => s.status === 'pending') && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Auto-processing will begin shortly...
+                </p>
+              )}
+            </div>
+          </CardContent>
+        )}
       </Card>
+
+      {/* Extraction Comparison View */}
+      {extractionResults && Object.keys(extractionResults).length > 0 && (
+        <ExtractionComparison 
+          results={extractionResults} 
+          extractionMode={extractionMode}
+        />
+      )}
 
       {/* Processing Steps */}
       <div className="space-y-1">
@@ -1558,7 +1800,7 @@ Conclusion: ${likelySteroidsEffect ?
                                     <span className="font-medium text-sm">FLAIR Volume</span>
                                   </div>
                                   <p className="text-xs text-muted-foreground mb-1">{step.data.flairVolume}</p>
-                                  <p className="text-lg font-bold">{step.data.flairChange}%</p>
+                                  <p className="text-lg font-bold">{typeof step.data.flairChange === 'number' ? step.data.flairChange.toFixed(1) : step.data.flairChange}%</p>
                                 </div>
                                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
                                   <div className="flex items-center gap-2 mb-2">
@@ -1569,7 +1811,7 @@ Conclusion: ${likelySteroidsEffect ?
                                     <span className="font-medium text-sm">Enhancement Volume</span>
                                   </div>
                                   <p className="text-xs text-muted-foreground mb-1">{step.data.enhVolume}</p>
-                                  <p className="text-lg font-bold">{step.data.enhChange}%</p>
+                                  <p className="text-lg font-bold">{typeof step.data.enhChange === 'number' ? step.data.enhChange.toFixed(1) : step.data.enhChange}%</p>
                                 </div>
                               </div>
                               <div className="text-center p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
@@ -1609,7 +1851,7 @@ Conclusion: ${likelySteroidsEffect ?
                                     .slice(0, 3)
                                     .map(([key, value]) => (
                                       <Badge key={key} variant="outline" className="text-xs">
-                                        {key.replace(/([A-Z])/g, ' $1').toLowerCase()}: {String(value)}
+                                        {key.replace(/([A-Z])/g, ' $1').toLowerCase()}: {typeof value === 'number' ? value.toFixed(1) : String(value)}
                                       </Badge>
                                     ))}
                                 </div>
@@ -1706,7 +1948,8 @@ Conclusion: ${likelySteroidsEffect ?
                                       {key.replace(/([A-Z])/g, ' $1').toLowerCase().replace(/^./, str => str.toUpperCase())}:
                                     </span>
                                     <span className="font-mono text-foreground">
-                                      {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                      {typeof value === 'object' ? JSON.stringify(value) : 
+                                       typeof value === 'number' ? value.toFixed(1) : String(value)}
                                     </span>
                                   </div>
                                 ))}
@@ -1740,6 +1983,51 @@ Conclusion: ${likelySteroidsEffect ?
           )
         })}
       </div>
+      
+      {/* Final Score Display */}
+      {(() => {
+        const finalStep = processingSteps.find(step => 
+          step.type === 'outcome' && step.status === 'completed' && step.btradsScore
+        )
+        
+        if (finalStep && finalStep.btradsScore) {
+          const volumeData = {
+            flairChange: parseFloat(patientData.data.flair_change_percentage || '0'),
+            enhancementChange: parseFloat(patientData.data.enhancement_change_percentage || '0'),
+            flairAbsolute: Math.abs((patientData.data.followup_flair_volume || 0) - (patientData.data.baseline_flair_volume || 0)),
+            enhancementAbsolute: Math.abs((patientData.data.followup_enhancement_volume || 0) - (patientData.data.baseline_enhancement_volume || 0))
+          }
+          
+          return (
+            <div className="mt-8">
+              <BTRADSFinalScore
+                score={finalStep.btradsScore}
+                steps={processingSteps}
+                patientId={patientId}
+                volumeData={volumeData}
+                onGenerateReport={() => {
+                  // TODO: Implement report generation
+                  console.log('Generate report for:', patientId)
+                }}
+                onShareResults={() => {
+                  // TODO: Implement share functionality
+                  console.log('Share results for:', patientId)
+                }}
+                onProcessNext={onProcessNext}
+                onProcessPrevious={onProcessPrevious}
+                hasNextPatient={hasNextPatient}
+                hasPreviousPatient={hasPreviousPatient}
+                remainingCount={remainingCount}
+                completedCount={completedCount}
+                autoAdvance={autoAdvance}
+                onAutoAdvanceChange={setAutoAdvance}
+              />
+            </div>
+          )
+        }
+        
+        return null
+      })()}
     </div>
   )
 }
