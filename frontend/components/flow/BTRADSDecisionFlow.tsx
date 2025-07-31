@@ -31,6 +31,7 @@ import { ConfidenceIndicator, type ConfidenceData } from '@/components/evidence/
 import { DecisionAuditTrail, type DecisionPoint, type DecisionCriteria, type AlternativePath } from '@/components/evidence/DecisionAuditTrail'
 import { ManualVerificationPanel, type VerificationItem } from '@/components/evidence/ManualVerificationPanel'
 import { BTRADSFinalScore } from './BTRADSFinalScore'
+import { DataConfidenceBadge } from '@/components/evidence/DataConfidenceBadge'
 import { 
   extractDataPoints, 
   extractMedicationsNLP, 
@@ -39,6 +40,17 @@ import {
   type ExtractionResult 
 } from './ExtractionFunctions'
 import { ExtractionComparison } from './BTRADSComparisonView'
+import { MissingInfoAlert } from '@/components/alerts/MissingInfoAlert'
+import type { 
+  MissingInfoItem, 
+  UserProvidedData, 
+  MissingInfoState
+} from '@/types/missing-info'
+import {
+  MEDICATION_FALLBACK_OPTIONS,
+  RADIATION_DATE_FALLBACK_OPTIONS,
+  VOLUME_FALLBACK_OPTIONS
+} from '@/types/missing-info'
 
 // BT-RADS Measurable Disease Threshold: 1 mL = 1×1×1 cm
 const MEASURABLE_DISEASE_THRESHOLD = 1.0
@@ -95,6 +107,13 @@ export function BTRADSDecisionFlow({
   const [autoAdvance, setAutoAdvance] = useState(false)
   // extractionMode is now passed as a prop
   const [extractionResults, setExtractionResults] = useState<ExtractionResult>({})
+  const [missingInfoState, setMissingInfoState] = useState<MissingInfoState>({
+    items: [],
+    userProvidedData: {},
+    isResolving: false,
+    currentItemIndex: 0
+  })
+  const [showMissingInfoAlert, setShowMissingInfoAlert] = useState(false)
 
   // Initialize with flowchart nodes
   useEffect(() => {
@@ -143,6 +162,123 @@ export function BTRADSDecisionFlow({
     }
   }, [patientId])
 
+  // Check for missing information in extraction results
+  const checkForMissingInfo = (results: ExtractionResult): MissingInfoItem[] => {
+    const missingItems: MissingInfoItem[] = []
+    
+    // Determine which extraction method to use based on mode
+    const useNLP = extractionMode === 'nlp' || extractionMode === 'both'
+    const useLLM = extractionMode === 'llm' || extractionMode === 'both'
+    
+    // For medications
+    const medNLP = useNLP ? results.nlp?.medications : null
+    const medLLM = useLLM ? results.llm?.medications : null
+    
+    // Choose the best result or identify if missing
+    const medConfidence = Math.max(
+      medNLP?.confidence || 0,
+      medLLM?.confidence || 0
+    )
+    
+    const isMedMissing = (medNLP?.isMissing || false) || (medLLM?.isMissing || false) || medConfidence < 50
+    
+    if (isMedMissing) {
+      missingItems.push({
+        id: 'medications',
+        type: 'medication_status',
+        field: 'medications',
+        label: 'Medication Status',
+        description: 'Unable to determine if patient is on Avastin or steroids from the clinical note',
+        severity: 'important',
+        requiredFor: ['Determine if improvement is due to medication effects', 'BT-1a vs BT-1b classification'],
+        confidence: medConfidence,
+        extractionMethod: extractionMode,
+        fallbackOptions: MEDICATION_FALLBACK_OPTIONS,
+        defaultFallback: 'unknown_assume_none',
+        validationRules: { type: 'text' }
+      })
+    }
+    
+    // For radiation date
+    const radNLP = useNLP ? results.nlp?.radiationDate : null
+    const radLLM = useLLM ? results.llm?.radiationDate : null
+    
+    const radConfidence = Math.max(
+      radNLP?.confidence || 0,
+      radLLM?.confidence || 0
+    )
+    
+    const isRadMissing = (radNLP?.isMissing || false) || (radLLM?.isMissing || false) || radConfidence < 50
+    
+    if (isRadMissing) {
+      missingItems.push({
+        id: 'radiation_date',
+        type: 'radiation_date',
+        field: 'radiation_date',
+        label: 'Radiation Completion Date',
+        description: 'Unable to determine when radiation therapy was completed',
+        severity: 'critical',
+        requiredFor: ['Determine if worsening could be treatment effect', 'BT-3a classification for recent radiation'],
+        confidence: radConfidence,
+        extractionMethod: extractionMode,
+        fallbackOptions: RADIATION_DATE_FALLBACK_OPTIONS,
+        defaultFallback: 'unknown_assume_recent',
+        validationRules: { type: 'date' }
+      })
+    }
+    
+    return missingItems
+  }
+
+  const handleMissingInfoResolution = (data: UserProvidedData) => {
+    // Update user provided data
+    setMissingInfoState(prev => ({
+      ...prev,
+      userProvidedData: {
+        ...prev.userProvidedData,
+        [data.itemId]: data
+      }
+    }))
+    
+    // Move to next missing item or continue processing
+    const nextIndex = missingInfoState.currentItemIndex + 1
+    if (nextIndex < missingInfoState.items.length) {
+      setMissingInfoState(prev => ({ ...prev, currentItemIndex: nextIndex }))
+    } else {
+      // All missing info resolved, continue processing
+      setShowMissingInfoAlert(false)
+      setMissingInfoState(prev => ({ ...prev, isResolving: false }))
+      continueProcessingWithUserData()
+    }
+  }
+  
+  const continueProcessingWithUserData = async () => {
+    // Update extraction results with user-provided data
+    const updatedResults = { ...extractionResults }
+    
+    Object.entries(missingInfoState.userProvidedData).forEach(([itemId, userData]) => {
+      if (itemId === 'medications' && userData.providedValue) {
+        // Update medication results
+        if (updatedResults.nlp?.medications) {
+          updatedResults.nlp.medications.steroidStatus = userData.providedValue.steroidStatus || 'unknown'
+          updatedResults.nlp.medications.avastinStatus = userData.providedValue.avastinStatus || 'unknown'
+          updatedResults.nlp.medications.confidence = 100 // User provided
+        }
+      } else if (itemId === 'radiation_date' && userData.providedValue) {
+        // Update radiation date results
+        if (updatedResults.nlp?.radiationDate) {
+          updatedResults.nlp.radiationDate.date = userData.providedValue
+          updatedResults.nlp.radiationDate.confidence = 100 // User provided
+        }
+      }
+    })
+    
+    setExtractionResults(updatedResults)
+    
+    // Continue with processing
+    await simulateProcessingSteps()
+  }
+
   const startProcessing = async () => {
     setIsProcessing(true)
     setCurrentStep(0)
@@ -152,6 +288,21 @@ export function BTRADSDecisionFlow({
       if (patientData?.data?.clinical_note) {
         const results = await extractDataPoints(patientData.data.clinical_note, extractionMode)
         setExtractionResults(results)
+        
+        // Check for missing information
+        const missingItems = checkForMissingInfo(results)
+        
+        if (missingItems.length > 0) {
+          // Show missing info alert
+          setMissingInfoState({
+            items: missingItems,
+            userProvidedData: {},
+            isResolving: true,
+            currentItemIndex: 0
+          })
+          setShowMissingInfoAlert(true)
+          return // Pause processing until user provides missing info
+        }
       }
       
       // Start the actual processing
@@ -774,7 +925,12 @@ export function BTRADSDecisionFlow({
             stableDose,
             clinicalContext: onAvastin && onSteroids ? 'Combination therapy' : 
                            onAvastin ? 'Anti-angiogenic therapy' :
-                           onSteroids ? 'Corticosteroid therapy' : 'Standard therapy'
+                           onSteroids ? 'Corticosteroid therapy' : 'Standard therapy',
+            // Add confidence data for display
+            medicationConfidence: extractionResults?.nlp?.medications?.confidence || 
+                                extractionResults?.llm?.medications?.confidence || 0,
+            medicationSource: missingInfoState.userProvidedData['medications'] ? 'user' : 
+                            extractionMode === 'llm' ? 'llm' : 'nlp'
           },
           reasoning: medAnalysis,
           evidence,
@@ -951,6 +1107,12 @@ export function BTRADSDecisionFlow({
             radiationMentioned,
             hasRecentIndicators,
             hasDistantIndicators,
+            radiationDate: extractedRadiationDate ? extractedRadiationDate.toLocaleDateString() : 'unknown',
+            // Add confidence data for display
+            radiationConfidence: extractionResults?.nlp?.radiationDate?.confidence || 
+                               extractionResults?.llm?.radiationDate?.confidence || 0,
+            radiationSource: missingInfoState.userProvidedData['radiation_date'] ? 'user' : 
+                           extractionMode === 'llm' ? 'llm' : 'nlp',
             confidenceLevel,
             extractedRadiationDate: extractedRadiationDate && !isNaN(extractedRadiationDate.getTime()) 
               ? extractedRadiationDate.toISOString().split('T')[0] 
@@ -1947,10 +2109,30 @@ Conclusion: ${likelySteroidsEffect ?
                                     <span className="font-medium text-muted-foreground">
                                       {key.replace(/([A-Z])/g, ' $1').toLowerCase().replace(/^./, str => str.toUpperCase())}:
                                     </span>
-                                    <span className="font-mono text-foreground">
-                                      {typeof value === 'object' ? JSON.stringify(value) : 
-                                       typeof value === 'number' ? value.toFixed(1) : String(value)}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-mono text-foreground">
+                                        {typeof value === 'object' ? JSON.stringify(value) : 
+                                         typeof value === 'number' ? value.toFixed(1) : String(value)}
+                                      </span>
+                                      {/* Add confidence badges for specific fields */}
+                                      {(key === 'onAvastin' || key === 'onSteroids') && step.data.medicationConfidence !== undefined && (
+                                        <DataConfidenceBadge
+                                          confidence={step.data.medicationConfidence}
+                                          source={step.data.medicationSource}
+                                          field="Medication Status"
+                                          value={value}
+                                        />
+                                      )}
+                                      {key === 'radiationDate' && step.data.radiationConfidence !== undefined && (
+                                        <DataConfidenceBadge
+                                          confidence={step.data.radiationConfidence}
+                                          source={step.data.radiationSource}
+                                          field="Radiation Date"
+                                          value={value}
+                                          isMissing={value === 'unknown'}
+                                        />
+                                      )}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -2021,6 +2203,7 @@ Conclusion: ${likelySteroidsEffect ?
                 completedCount={completedCount}
                 autoAdvance={autoAdvance}
                 onAutoAdvanceChange={setAutoAdvance}
+                userProvidedData={missingInfoState.userProvidedData}
               />
             </div>
           )
@@ -2028,6 +2211,28 @@ Conclusion: ${likelySteroidsEffect ?
         
         return null
       })()}
+      
+      {/* Missing Information Alert */}
+      {showMissingInfoAlert && missingInfoState.items.length > 0 && (
+        <MissingInfoAlert
+          item={missingInfoState.items[missingInfoState.currentItemIndex]}
+          isOpen={showMissingInfoAlert}
+          onResolve={handleMissingInfoResolution}
+          onSkip={() => {
+            // Skip current item and move to next
+            const nextIndex = missingInfoState.currentItemIndex + 1
+            if (nextIndex < missingInfoState.items.length) {
+              setMissingInfoState(prev => ({ ...prev, currentItemIndex: nextIndex }))
+            } else {
+              setShowMissingInfoAlert(false)
+              continueProcessingWithUserData()
+            }
+          }}
+          previousValue={missingInfoState.userProvidedData[
+            missingInfoState.items[missingInfoState.currentItemIndex]?.id
+          ]}
+        />
+      )}
     </div>
   )
 }

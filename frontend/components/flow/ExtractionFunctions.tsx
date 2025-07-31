@@ -1,20 +1,46 @@
 // Extraction helper functions for BT-RADS Decision Flow
 import { api } from '@/lib/api/client'
+import type { ExtractionResult as MissingInfoExtractionResult } from '@/types/missing-info'
 
 export type ExtractionMode = 'nlp' | 'llm' | 'both'
 
 export interface ExtractionResult {
   nlp?: {
-    medications?: { steroidStatus: string; avastinStatus: string; evidence: any[] }
-    radiationDate?: { date: string; evidence: any[] }
+    medications?: { 
+      steroidStatus: string
+      avastinStatus: string
+      evidence: any[]
+      confidence?: number
+      isMissing?: boolean
+    }
+    radiationDate?: { 
+      date: string
+      evidence: any[]
+      confidence?: number
+      isMissing?: boolean
+    }
   }
   llm?: {
-    medications?: { data: any; evidence: any[]; confidence: number; processing_time: number }
-    radiationDate?: { data: any; evidence: any[]; confidence: number; processing_time: number }
+    medications?: { 
+      data: any
+      evidence: any[]
+      confidence: number
+      processing_time: number
+      isMissing?: boolean
+      error?: string
+    }
+    radiationDate?: { 
+      data: any
+      evidence: any[]
+      confidence: number
+      processing_time: number
+      isMissing?: boolean
+      error?: string
+    }
   }
 }
 
-export const extractMedicationsNLP = (text: string) => {
+export const extractMedicationsNLP = (text: string): MissingInfoExtractionResult => {
   const clinicalNote = text.toLowerCase()
   
   // Avastin patterns
@@ -31,9 +57,19 @@ export const extractMedicationsNLP = (text: string) => {
   ]
   const hasSteroid = steroidPatterns.some(p => p.test(clinicalNote))
   
+  // Check for negative patterns that reduce confidence
+  const negativePatterns = [
+    /no\s+(steroid|avastin|medication)/gi,
+    /not\s+on\s+(steroid|avastin)/gi,
+    /discontinued\s+(steroid|avastin)/gi,
+    /off\s+(steroid|avastin)/gi
+  ]
+  const hasNegativePattern = negativePatterns.some(p => p.test(clinicalNote))
+  
   // Enhanced status detection
   let steroidStatus = 'none'
   let avastinStatus = 'none'
+  let confidence = 0
   
   if (hasSteroid) {
     if (/increas\w*\s*(?:dose|dosage)?\s*(?:of\s*)?(?:steroid|dexamethasone|decadron)/gi.test(clinicalNote) ||
@@ -98,14 +134,39 @@ export const extractMedicationsNLP = (text: string) => {
     }
   })
   
+  // Calculate confidence
+  if (!hasAvastin && !hasSteroid) {
+    // No medication mentions found
+    confidence = hasNegativePattern ? 85 : 30 // Higher confidence if explicit negative
+  } else {
+    // Medications found
+    const evidenceCount = evidence.length
+    if (evidenceCount >= 3) confidence = 95
+    else if (evidenceCount >= 2) confidence = 85
+    else if (evidenceCount >= 1) confidence = 70
+    else confidence = 50
+    
+    // Reduce confidence if negative patterns found
+    if (hasNegativePattern) confidence -= 20
+  }
+  
+  // Determine if missing
+  const isMissing = confidence < 50 && !hasNegativePattern
+  
   return {
-    steroidStatus,
-    avastinStatus,
-    evidence: evidence.slice(0, 5)
+    value: {
+      steroidStatus,
+      avastinStatus,
+      evidence: evidence.slice(0, 5)
+    },
+    confidence,
+    isMissing,
+    source: 'nlp_pattern_matching',
+    evidence: evidence.map(e => e.text)
   }
 }
 
-export const extractRadiationDateNLP = (text: string) => {
+export const extractRadiationDateNLP = (text: string): MissingInfoExtractionResult => {
   // Date range patterns (capture both start and end)
   const dateRangePatterns = [
     /radiation.*?(\d{1,2}\/\d{1,2}\/\d{2,4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
@@ -120,8 +181,23 @@ export const extractRadiationDateNLP = (text: string) => {
     /(\d{1,2}\/\d{1,2}\/\d{2,4}).*?radiation.*?complet/gi
   ]
   
+  // Check for radiation mentions without dates
+  const radiationMentions = [
+    /radiation/gi, /xrt/gi, /radiotherapy/gi, /rt\b/gi
+  ]
+  const hasRadiationMention = radiationMentions.some(p => p.test(text))
+  
+  // Check for no radiation patterns
+  const noRadiationPatterns = [
+    /no\s+(?:prior\s+)?radiation/gi,
+    /never\s+(?:had\s+)?radiation/gi,
+    /radiation\s+naive/gi
+  ]
+  const hasNoRadiation = noRadiationPatterns.some(p => p.test(text))
+  
   let radiationDate = 'unknown'
   const evidence: any[] = []
+  let confidence = 0
   
   // First try date ranges (use end date)
   for (const pattern of dateRangePatterns) {
@@ -138,6 +214,7 @@ export const extractRadiationDateNLP = (text: string) => {
         date: radiationDate,
         pattern: pattern.source
       })
+      confidence = 95 // High confidence with date range
       break
     }
   }
@@ -156,21 +233,56 @@ export const extractRadiationDateNLP = (text: string) => {
           date: radiationDate,
           pattern: pattern.source
         })
+        confidence = 85 // Good confidence with single date
         break
       }
     }
   }
   
-  return { date: radiationDate, evidence }
+  // Calculate confidence and missing status
+  if (radiationDate === 'unknown') {
+    if (hasNoRadiation) {
+      radiationDate = 'no_radiation'
+      confidence = 90 // High confidence in no radiation
+    } else if (hasRadiationMention) {
+      confidence = 20 // Low confidence - radiation mentioned but no date
+    } else {
+      confidence = 10 // Very low confidence - no radiation info at all
+    }
+  }
+  
+  const isMissing = radiationDate === 'unknown' && hasRadiationMention
+  
+  return {
+    value: { date: radiationDate, evidence },
+    confidence,
+    isMissing,
+    source: 'nlp_pattern_matching',
+    evidence: evidence.map(e => e.text)
+  }
 }
 
 export const extractDataPoints = async (text: string, mode: ExtractionMode) => {
   const results: ExtractionResult = {}
   
   if (mode === 'nlp' || mode === 'both') {
+    const medsResult = extractMedicationsNLP(text)
+    const radResult = extractRadiationDateNLP(text)
+    
     results.nlp = {
-      medications: extractMedicationsNLP(text),
-      radiationDate: extractRadiationDateNLP(text)
+      medications: {
+        steroidStatus: medsResult.value.steroidStatus,
+        avastinStatus: medsResult.value.avastinStatus,
+        evidence: medsResult.value.evidence,
+        confidence: medsResult.confidence,
+        isMissing: medsResult.isMissing
+      },
+      radiationDate: {
+        date: radResult.value.date,
+        evidence: radResult.value.evidence,
+        confidence: radResult.confidence,
+        isMissing: radResult.isMissing
+      }
     }
   }
   
@@ -189,9 +301,22 @@ export const extractDataPoints = async (text: string, mode: ExtractionMode) => {
         })
       ])
       
+      // Check for low confidence or missing data in LLM results
+      const medConfidence = medicationsResponse.confidence || 0
+      const radConfidence = radiationResponse.confidence || 0
+      
       results.llm = {
-        medications: medicationsResponse,
-        radiationDate: radiationResponse
+        medications: {
+          ...medicationsResponse,
+          isMissing: medConfidence < 50 || 
+            (medicationsResponse.data?.steroid_status === 'unknown' && 
+             medicationsResponse.data?.avastin_status === 'unknown')
+        },
+        radiationDate: {
+          ...radiationResponse,
+          isMissing: radConfidence < 50 || 
+            radiationResponse.data?.radiation_date === 'unknown'
+        }
       }
     } catch (error) {
       console.error('LLM extraction error:', error)
@@ -202,6 +327,7 @@ export const extractDataPoints = async (text: string, mode: ExtractionMode) => {
           evidence: [],
           confidence: 0,
           processing_time: 0,
+          isMissing: true,
           error: error instanceof Error ? error.message : 'LLM extraction failed'
         },
         radiationDate: {
@@ -209,6 +335,7 @@ export const extractDataPoints = async (text: string, mode: ExtractionMode) => {
           evidence: [],
           confidence: 0,
           processing_time: 0,
+          isMissing: true,
           error: error instanceof Error ? error.message : 'LLM extraction failed'
         }
       }

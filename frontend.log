@@ -767,3 +767,105 @@ Import trace for requested module:
  GET / 200 in 197ms
  GET / 200 in 100ms
  GET / 200 in 117ms
+ ✓ Compiled in 1052ms (1248 modules)
+ ✓ Compiled in 778ms (2002 modules)
+ ✓ Compiled in 281ms (2002 modules)
+ ✓ Compiled in 600ms (2002 modules)
+ ✓ Compiled in 506ms (2002 modules)
+ ✓ Compiled in 478ms (2004 modules)
+ ⨯ ./components/alerts/MissingInfoAlert.tsx:13:1
+Module not found: Can't resolve '@/components/ui/input'
+  11 | } from "@/components/ui/dialog"
+  12 | import { Button } from "@/components/ui/button"
+> 13 | import { Input } from "@/components/ui/input"
+     | ^
+  14 | import { Label } from "@/components/ui/label"
+  15 | import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+  16 | import { Textarea } from "@/components/ui/textarea"
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled in 682ms (2059 modules)
+ ✓ Compiled in 350ms (1253 modules)
+ ✓ Compiled in 475ms (2059 modules)
+ ⨯ ./components/evidence/DataConfidenceBadge.tsx:14:1
+Module not found: Can't resolve '@/components/ui/tooltip'
+  12 |   HelpCircle
+  13 | } from "lucide-react"
+> 14 | import {
+     | ^
+  15 |   Tooltip,
+  16 |   TooltipContent,
+  17 |   TooltipProvider,
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/ui/tooltip.tsx:4:1
+Module not found: Can't resolve '@radix-ui/react-tooltip'
+  2 |
+  3 | import * as React from "react"
+> 4 | import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+    | ^
+  5 |
+  6 | import { cn } from "@/lib/utils"
+  7 |
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./components/evidence/DataConfidenceBadge.tsx
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ⨯ ./components/ui/tooltip.tsx:4:1
+Module not found: Can't resolve '@radix-ui/react-tooltip'
+  2 |
+  3 | import * as React from "react"
+> 4 | import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+    | ^
+  5 |
+  6 | import { cn } from "@/lib/utils"
+  7 |
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./components/evidence/DataConfidenceBadge.tsx
+./components/flow/BTRADSDecisionFlow.tsx
+./app/page.tsx
+ ✓ Compiled in 1310ms (2085 modules)
+ ✓ Compiled in 795ms (2085 modules)
+ GET / 200 in 526ms
+ GET / 200 in 48ms
+ GET / 200 in 21ms
+ GET / 200 in 18ms
+ GET / 200 in 18ms
+ GET / 200 in 29ms
+ GET / 200 in 33ms
+ GET / 200 in 21ms
+ GET / 200 in 25ms
+ GET / 200 in 18ms
+ GET / 200 in 14ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 695ms (2093 modules)
+ GET /apple-touch-icon.png 404 in 807ms
+ GET /apple-touch-icon-precomposed.png 404 in 810ms
+ GET /apple-touch-icon.png 404 in 1030ms
+ GET /apple-touch-icon-precomposed.png 404 in 1033ms
+ GET /favicon.ico 200 in 1047ms
+ GET /favicon.ico 200 in 1049ms
+ GET /favicon.ico 200 in 6ms
+ GET /favicon.ico 200 in 5ms
+ GET / 200 in 176ms
+ ✓ Compiled in 1461ms (2107 modules)
+ GET / 200 in 89ms
+ GET / 200 in 104ms
+ ✓ Compiled in 1734ms (2085 modules)
+ GET / 200 in 338ms
+ GET / 200 in 351ms
+ GET / 200 in 293ms

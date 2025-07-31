@@ -23,6 +23,8 @@ import {
   Timer
 } from "lucide-react"
 import type { ProcessingStep } from './BTRADSDecisionFlow'
+import type { UserProvidedData } from '@/types/missing-info'
+import { DataConfidenceBadge } from '@/components/evidence/DataConfidenceBadge'
 
 interface BTRADSFinalScoreProps {
   score: string
@@ -44,6 +46,7 @@ interface BTRADSFinalScoreProps {
   completedCount?: number
   autoAdvance?: boolean
   onAutoAdvanceChange?: (enabled: boolean) => void
+  userProvidedData?: Record<string, UserProvidedData>
 }
 
 const scoreDescriptions: Record<string, { 
@@ -251,6 +254,95 @@ export function BTRADSFinalScore({
                 >
                   {index + 1}. {step.label}
                 </Badge>
+              ))}
+          </div>
+        </div>
+
+        {/* Manual Interventions & Data Quality */}
+        {userProvidedData && Object.keys(userProvidedData).length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-yellow-600" />
+              Manual Interventions & Data Quality
+            </h3>
+            <Card className="border-yellow-200 bg-yellow-50/50 dark:bg-yellow-950/20">
+              <CardContent className="pt-4 space-y-3">
+                {Object.entries(userProvidedData).map(([itemId, data]) => (
+                  <div key={itemId} className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">
+                          {itemId === 'medications' ? 'Medication Status' : 
+                           itemId === 'radiation_date' ? 'Radiation Date' : itemId}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {data.confirmedMissing ? 'User confirmed data unavailable' : 'User provided value'}
+                        </p>
+                        {data.providedValue && (
+                          <p className="text-sm mt-1 font-mono">
+                            Value: {typeof data.providedValue === 'object' ? 
+                              JSON.stringify(data.providedValue, null, 2) : 
+                              String(data.providedValue)}
+                          </p>
+                        )}
+                        {data.selectedFallback && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Fallback option: {data.selectedFallback}
+                          </p>
+                        )}
+                        {data.notes && (
+                          <p className="text-xs text-muted-foreground mt-1 italic">
+                            Notes: {data.notes}
+                          </p>
+                        )}
+                      </div>
+                      <DataConfidenceBadge
+                        confidence={100}
+                        source="user"
+                        field={itemId}
+                        value={data.providedValue}
+                      />
+                    </div>
+                    {itemId !== Object.keys(userProvidedData)[Object.keys(userProvidedData).length - 1] && (
+                      <Separator className="my-2" />
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Data Confidence Summary */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Data Confidence Summary</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {steps
+              .filter(s => s.data?.medicationConfidence !== undefined || s.data?.radiationConfidence !== undefined)
+              .map(step => (
+                <React.Fragment key={step.nodeId}>
+                  {step.data?.medicationConfidence !== undefined && (
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <span className="text-sm font-medium">Medications</span>
+                      <DataConfidenceBadge
+                        confidence={step.data.medicationConfidence}
+                        source={step.data.medicationSource}
+                        field="Medication Status"
+                      />
+                    </div>
+                  )}
+                  {step.data?.radiationConfidence !== undefined && (
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <span className="text-sm font-medium">Radiation Date</span>
+                      <DataConfidenceBadge
+                        confidence={step.data.radiationConfidence}
+                        source={step.data.radiationSource}
+                        field="Radiation Date"
+                        isMissing={step.data.radiationDate === 'unknown'}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
           </div>
         </div>
