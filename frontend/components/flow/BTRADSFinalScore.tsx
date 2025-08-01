@@ -119,7 +119,8 @@ export function BTRADSFinalScore({
   remainingCount = 0,
   completedCount = 0,
   autoAdvance = false,
-  onAutoAdvanceChange
+  onAutoAdvanceChange,
+  userProvidedData
 }: BTRADSFinalScoreProps) {
   const scoreInfo = scoreDescriptions[score] || scoreDescriptions['0']
   const [countdown, setCountdown] = useState<number | null>(null)

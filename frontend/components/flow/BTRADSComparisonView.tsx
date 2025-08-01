@@ -80,11 +80,11 @@ export function ExtractionComparison({ results, extractionMode }: ExtractionComp
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>Confidence: {(llmMeds?.confidence * 100).toFixed(0)}%</span>
+                    <span>Confidence: {((llmMeds?.confidence || 0) * 100).toFixed(0)}%</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {llmMeds?.processing_time?.toFixed(1)}s
+                      {(llmMeds?.processing_time || 0).toFixed(1)}s
                     </span>
                   </div>
                 </div>
@@ -143,11 +143,11 @@ export function ExtractionComparison({ results, extractionMode }: ExtractionComp
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>Confidence: {(llmRad?.confidence * 100).toFixed(0)}%</span>
+                    <span>Confidence: {((llmRad?.confidence || 0) * 100).toFixed(0)}%</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {llmRad?.processing_time?.toFixed(1)}s
+                      {(llmRad?.processing_time || 0).toFixed(1)}s
                     </span>
                   </div>
                 </div>

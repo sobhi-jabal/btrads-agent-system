@@ -158,6 +158,6 @@ async def get_status(patient_id: str):
     return {"error": "Patient not found"}
 
 if __name__ == "__main__":
-    print("Starting BT-RADS Mock Backend on http://localhost:8000")
-    print("API Documentation available at http://localhost:8000/docs")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    print("Starting BT-RADS Mock Backend on http://localhost:5001")
+    print("API Documentation available at http://localhost:5001/docs")
+    uvicorn.run(app, host="0.0.0.0", port=5001)
