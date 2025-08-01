@@ -52,7 +52,7 @@ export default function Home() {
   const [allPatients, setAllPatients] = useState<any[]>([]);
   
   // Extraction settings
-  const [extractionMode, setExtractionMode] = useState<'nlp' | 'llm' | 'both'>('both');
+  const [extractionMode, setExtractionMode] = useState<'nlp' | 'llm' | 'both'>('nlp');
 
   // Debug logging
   useEffect(() => {
@@ -246,19 +246,10 @@ export default function Home() {
 
   const processPatient = async (patient: any) => {
     setActivePatientId(patient.id);
-    setIsProcessing(true);
     setError(null);
-    
-    try {
-      await api.patients.startProcessing(patient.id, false);
-      setSuccess(`Started processing patient ${patient.id}`);
-      setExpandedSection("results");
-    } catch (error) {
-      console.error("Error processing patient:", error);
-      setError(`Failed to process patient ${patient.id}`);
-    } finally {
-      setIsProcessing(false);
-    }
+    setSuccess(null);
+    // Just set the patient and expand results - BTRADSDecisionFlow will handle the actual processing
+    setExpandedSection("results");
   };
   
   // Mark patient as processed

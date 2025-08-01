@@ -262,83 +262,85 @@ export const extractRadiationDateNLP = (text: string): MissingInfoExtractionResu
   }
 }
 
-export const extractDataPoints = async (text: string, mode: ExtractionMode) => {
-  const results: ExtractionResult = {}
+// Separate NLP extraction - always works, no external dependencies
+export const extractDataPointsNLP = (text: string) => {
+  const medsResult = extractMedicationsNLP(text)
+  const radResult = extractRadiationDateNLP(text)
   
-  if (mode === 'nlp' || mode === 'both') {
-    const medsResult = extractMedicationsNLP(text)
-    const radResult = extractRadiationDateNLP(text)
-    
-    results.nlp = {
-      medications: {
-        steroidStatus: medsResult.value.steroidStatus,
-        avastinStatus: medsResult.value.avastinStatus,
-        evidence: medsResult.value.evidence,
-        confidence: medsResult.confidence,
-        isMissing: medsResult.isMissing
-      },
-      radiationDate: {
-        date: radResult.value.date,
-        evidence: radResult.value.evidence,
-        confidence: radResult.confidence,
-        isMissing: radResult.isMissing
-      }
+  return {
+    medications: {
+      steroidStatus: medsResult.value.steroidStatus,
+      avastinStatus: medsResult.value.avastinStatus,
+      evidence: medsResult.value.evidence,
+      confidence: medsResult.confidence,
+      isMissing: medsResult.isMissing
+    },
+    radiationDate: {
+      date: radResult.value.date,
+      evidence: radResult.value.evidence,
+      confidence: radResult.confidence,
+      isMissing: radResult.isMissing
     }
   }
+}
+
+// Separate LLM extraction - optional, can fail gracefully
+export const extractDataPointsLLM = async (text: string) => {
+  try {
+    const [medicationsResponse, radiationResponse] = await Promise.all([
+      api.llm.extract({
+        clinical_note: text,
+        extraction_type: 'medications',
+        model: 'phi4:14b'
+      }),
+      api.llm.extract({
+        clinical_note: text,
+        extraction_type: 'radiation_date',
+        model: 'phi4:14b'
+      })
+    ])
+    
+    // Check for low confidence or missing data in LLM results
+    const medConfidence = medicationsResponse.confidence || 0
+    const radConfidence = radiationResponse.confidence || 0
+    
+    return {
+      medications: {
+        ...medicationsResponse,
+        isMissing: medConfidence < 50 || 
+          (medicationsResponse.data?.steroid_status === 'unknown' && 
+           medicationsResponse.data?.avastin_status === 'unknown')
+      },
+      radiationDate: {
+        ...radiationResponse,
+        isMissing: radConfidence < 50 || 
+          radiationResponse.data?.radiation_date === 'unknown'
+      }
+    }
+  } catch (error) {
+    console.error('LLM extraction error:', error)
+    // Return null on error - let the caller handle it
+    return null
+  }
+}
+
+// Main orchestrator function - coordinates NLP and LLM extraction
+export const extractDataPoints = async (text: string, mode: ExtractionMode): Promise<ExtractionResult> => {
+  const results: ExtractionResult = {}
   
+  // Always run NLP extraction first (never fails)
+  if (mode === 'nlp' || mode === 'both') {
+    results.nlp = extractDataPointsNLP(text)
+  }
+  
+  // Then try LLM if requested
   if (mode === 'llm' || mode === 'both') {
-    try {
-      const [medicationsResponse, radiationResponse] = await Promise.all([
-        api.llm.extract({
-          clinical_note: text,
-          extraction_type: 'medications',
-          model: 'phi4:14b'
-        }),
-        api.llm.extract({
-          clinical_note: text,
-          extraction_type: 'radiation_date',
-          model: 'phi4:14b'
-        })
-      ])
-      
-      // Check for low confidence or missing data in LLM results
-      const medConfidence = medicationsResponse.confidence || 0
-      const radConfidence = radiationResponse.confidence || 0
-      
-      results.llm = {
-        medications: {
-          ...medicationsResponse,
-          isMissing: medConfidence < 50 || 
-            (medicationsResponse.data?.steroid_status === 'unknown' && 
-             medicationsResponse.data?.avastin_status === 'unknown')
-        },
-        radiationDate: {
-          ...radiationResponse,
-          isMissing: radConfidence < 50 || 
-            radiationResponse.data?.radiation_date === 'unknown'
-        }
-      }
-    } catch (error) {
-      console.error('LLM extraction error:', error)
-      // Return error state
-      results.llm = {
-        medications: {
-          data: { steroid_status: 'unknown', avastin_status: 'unknown' },
-          evidence: [],
-          confidence: 0,
-          processing_time: 0,
-          isMissing: true,
-          error: error instanceof Error ? error.message : 'LLM extraction failed'
-        },
-        radiationDate: {
-          data: { radiation_date: 'unknown' },
-          evidence: [],
-          confidence: 0,
-          processing_time: 0,
-          isMissing: true,
-          error: error instanceof Error ? error.message : 'LLM extraction failed'
-        }
-      }
+    const llmResults = await extractDataPointsLLM(text)
+    if (llmResults) {
+      results.llm = llmResults
+    } else {
+      // LLM failed but we can continue with NLP results
+      console.log('LLM extraction failed, continuing with NLP results only')
     }
   }
   
