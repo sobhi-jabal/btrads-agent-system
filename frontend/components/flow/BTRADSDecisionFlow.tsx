@@ -48,6 +48,7 @@ import { InlineMedicationForm } from './InlineMedicationForm'
 import { InlineRadiationForm } from './InlineRadiationForm'
 import { transformEvidence } from './ExtractionFunctions'
 import { handleLLMMedications, handleLLMRadiation, transformLLMEvidence } from './LLMExtractionHandler'
+import { downloadBTRADSReport, type BTRADSReportData } from '@/utils/reportGenerator'
 import { MissingInfoTracker } from './MissingInfoTracker'
 import { MissingInfoCollector } from '@/lib/utils/missing-info-tracker'
 import type { 
@@ -2680,8 +2681,32 @@ Conclusion: ${likelySteroidsEffect ?
                 patientId={patientId}
                 volumeData={volumeData}
                 onGenerateReport={() => {
-                  // TODO: Implement report generation
-                  console.log('Generate report for:', patientId)
+                  // Gather all data for the report
+                  const reportData: BTRADSReportData = {
+                    patientId: patientId,
+                    clinicalNote: patientData?.data?.clinical_note || '',
+                    btRadsScore: finalStep.btradsScore || '',
+                    finalDecision: finalStep.data?.category || '',
+                    reasoning: finalStep.reasoning || '',
+                    decisionPath: processingSteps
+                      .filter(step => step.status === 'completed' && step.name)
+                      .map(step => ({
+                        step: step.name,
+                        decision: step.data?.assessment || step.data?.medicationPath || step.data?.timeCategory || 'N/A',
+                        reasoning: step.reasoning || ''
+                      })),
+                    evidence: aggregatedEvidence,
+                    extractedData: {
+                      steroidStatus: extractionResults?.medications?.steroidStatus,
+                      avastinStatus: extractionResults?.medications?.avastinStatus,
+                      radiationDate: extractionResults?.radiationDate?.radiationDate,
+                      imagingAssessment: processingSteps.find(s => s.id === 'node_2_imaging_assessment')?.data?.assessment
+                    },
+                    timestamp: new Date().toISOString()
+                  }
+                  
+                  // Download the report
+                  downloadBTRADSReport(reportData)
                 }}
                 onShareResults={() => {
                   // TODO: Implement share functionality
