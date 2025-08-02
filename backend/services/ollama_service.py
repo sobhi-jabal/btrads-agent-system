@@ -268,11 +268,12 @@ class OllamaExtractionService:
             # Parse response
             result = self._parse_medication_response(response)
             
-            # Create evidence from LLM's extracted sentences
+            # Create evidence from LLM's extracted sentences with position tracking
             evidence = []
             
             # Add steroid evidence if provided
             if result.get("steroid_evidence"):
+                position = self._find_text_position(result["steroid_evidence"], clinical_note)
                 evidence.append({
                     "type": "steroid",
                     "category": "medication",
@@ -280,11 +281,15 @@ class OllamaExtractionService:
                     "source_type": "llm_extraction",
                     "confidence": 0.95,
                     "relevance_score": 1.0,
-                    "llm_extracted": True
+                    "llm_extracted": True,
+                    "start_pos": position["start"],
+                    "end_pos": position["end"],
+                    "position_found": position["found"]
                 })
             
             # Add avastin evidence if provided
             if result.get("avastin_evidence"):
+                position = self._find_text_position(result["avastin_evidence"], clinical_note)
                 evidence.append({
                     "type": "avastin",
                     "category": "medication",
@@ -292,7 +297,10 @@ class OllamaExtractionService:
                     "source_type": "llm_extraction",
                     "confidence": 0.95,
                     "relevance_score": 1.0,
-                    "llm_extracted": True
+                    "llm_extracted": True,
+                    "start_pos": position["start"],
+                    "end_pos": position["end"],
+                    "position_found": position["found"]
                 })
             
             processing_time = (datetime.now() - start_time).total_seconds()
@@ -346,10 +354,11 @@ class OllamaExtractionService:
             # Parse response
             result = self._parse_radiation_response(response)
             
-            # Create evidence from LLM's extracted sentence
+            # Create evidence from LLM's extracted sentence with position tracking
             evidence = []
             
             if result.get("radiation_evidence"):
+                position = self._find_text_position(result["radiation_evidence"], clinical_note)
                 evidence.append({
                     "type": "radiation_date",
                     "category": "temporal",
@@ -358,7 +367,10 @@ class OllamaExtractionService:
                     "source_type": "llm_extraction",
                     "confidence": 0.95,
                     "relevance_score": 1.0,
-                    "llm_extracted": True
+                    "llm_extracted": True,
+                    "start_pos": position["start"],
+                    "end_pos": position["end"],
+                    "position_found": position["found"]
                 })
             
             processing_time = (datetime.now() - start_time).total_seconds()
@@ -805,6 +817,85 @@ class OllamaExtractionService:
             pass
         
         return 0.5
+    
+    def _find_text_position(self, text: str, full_text: str) -> Dict[str, Any]:
+        """Find the position of extracted text within the full clinical note
+        
+        Args:
+            text: The extracted text to find
+            full_text: The full clinical note to search in
+            
+        Returns:
+            Dict with start, end positions and found flag
+        """
+        if not text or not full_text:
+            return {"start": 0, "end": 0, "found": False}
+        
+        # Strategy 1: Try exact match
+        start_pos = full_text.find(text)
+        if start_pos != -1:
+            return {
+                "start": start_pos,
+                "end": start_pos + len(text),
+                "found": True
+            }
+        
+        # Strategy 2: Case-insensitive match
+        lower_full = full_text.lower()
+        lower_text = text.lower()
+        start_pos = lower_full.find(lower_text)
+        if start_pos != -1:
+            return {
+                "start": start_pos,
+                "end": start_pos + len(text),
+                "found": True
+            }
+        
+        # Strategy 3: Normalized whitespace match
+        # Normalize whitespace in both texts
+        norm_full = ' '.join(full_text.split())
+        norm_text = ' '.join(text.split())
+        
+        # Find in normalized version
+        norm_start = norm_full.find(norm_text)
+        if norm_start != -1:
+            # Map back to original position (approximate)
+            # Count characters in original up to the normalized position
+            char_count = 0
+            norm_count = 0
+            original_start = 0
+            
+            for i, char in enumerate(full_text):
+                if norm_count >= norm_start:
+                    original_start = i
+                    break
+                    
+                if char.isspace():
+                    # In normalized, multiple spaces become one
+                    if i == 0 or not full_text[i-1].isspace():
+                        norm_count += 1
+                else:
+                    norm_count += 1
+            
+            return {
+                "start": original_start,
+                "end": min(original_start + len(text), len(full_text)),
+                "found": True
+            }
+        
+        # Strategy 4: Try to find a significant substring (first 50 chars)
+        if len(text) > 50:
+            substring = text[:50]
+            start_pos = full_text.find(substring)
+            if start_pos != -1:
+                return {
+                    "start": start_pos,
+                    "end": min(start_pos + len(text), len(full_text)),
+                    "found": True
+                }
+        
+        # Not found
+        return {"start": 0, "end": 0, "found": False}
     
     def _parse_node_response(self, response: str, node_name: str) -> Dict[str, Any]:
         """Parse response for specific BT-RADS node"""

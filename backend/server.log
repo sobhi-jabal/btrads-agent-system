@@ -3549,3 +3549,219 @@ INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransform
 INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
 INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
 INFO:     Application startup complete.
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [73164]
+Python(94899) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:5 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+Python(94935) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:3 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:__mp_main__:Using LangGraphOrchestrator for orchestration
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [94935]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [94935]
+Python(94998) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:3 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:__mp_main__:Using LangGraphOrchestrator for orchestration
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [94998]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'postgres': False, 'ollama': True}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.

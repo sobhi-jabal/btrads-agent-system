@@ -85,17 +85,24 @@ export const transformLLMEvidence = (llmEvidence: any[], clinicalNote?: string):
   return llmEvidence
     .filter(item => item.llm_extracted === true) // Only use LLM-extracted evidence
     .map((item, index) => {
-      const position = clinicalNote 
-        ? findSentencePosition(item.text || '', clinicalNote)
-        : { start: 0, end: 0 }
+      // Use backend-provided positions if available, otherwise try to find them
+      let startIndex = item.start_pos ?? 0
+      let endIndex = item.end_pos ?? 0
+      
+      // Only try to find position if backend didn't provide it or didn't find it
+      if ((!item.position_found || (startIndex === 0 && endIndex === 0)) && clinicalNote) {
+        const position = findSentencePosition(item.text || '', clinicalNote)
+        startIndex = position.start
+        endIndex = position.end
+      }
       
       return {
         id: `llm-evidence-${index}-${item.type}`,
         sourceText: item.text || '',
         matchedPattern: 'LLM extraction',
         confidence: 'high' as const,
-        startIndex: position.start,
-        endIndex: position.end,
+        startIndex: startIndex,
+        endIndex: endIndex,
         category: item.category || item.type || 'general',
         reasoning: `Extracted by LLM with ${(item.confidence * 100).toFixed(0)}% confidence`,
         relevanceScore: item.relevance_score || 1.0,
