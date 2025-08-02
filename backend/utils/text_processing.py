@@ -1,6 +1,6 @@
 """Text processing utilities for agent source highlighting"""
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import nltk
@@ -214,3 +214,231 @@ def highlight_in_context(
         context_text = context_text + "..."
     
     return context_text, highlight_start, highlight_end
+
+def detect_medical_sections(text: str) -> List[Tuple[str, int, int]]:
+    """
+    Detect medical document sections in text
+    Returns: List of (section_name, start_pos, end_pos)
+    """
+    patterns = [
+        (r"Oncology Treatment History:", "treatment_history"),
+        (r"Current Medications:", "current_medications"),
+        (r"Treatment to be received:", "treatment_plan"),
+        (r"History of Present Illness:", "present_illness"),
+        (r"Assessment & Plan:", "assessment_plan"),
+        (r"Subjective:", "subjective"),
+        (r"Objective:", "objective"),
+        (r"Past Medical History:", "past_medical"),
+        (r"Past Surgical History:", "past_surgical"),
+        (r"Social History:", "social_history"),
+        (r"Review of Systems:", "review_systems"),
+        (r"Physical Exam:", "physical_exam"),
+        (r"Laboratory:", "laboratory"),
+        (r"Allergies:", "allergies"),
+        (r"Impression:", "impression"),
+        (r"Imaging:", "imaging"),
+        (r"Medications:", "medications"),
+        (r"Chief Complaint:", "chief_complaint"),
+    ]
+    
+    sections: List[Tuple[str, int, int]] = []
+    
+    # Find all section headers
+    for pat, name in patterns:
+        for m in re.finditer(pat, text, re.IGNORECASE):
+            sections.append((name, m.start(), m.end()))
+    
+    # Sort by position
+    sections.sort(key=lambda x: x[1])
+    
+    # Determine section boundaries
+    final_sections: List[Tuple[str, int, int]] = []
+    for i, (name, start, header_end) in enumerate(sections):
+        # End position is either start of next section or end of text
+        end = sections[i + 1][1] if i < len(sections) - 1 else len(text)
+        final_sections.append((name, start, end))
+    
+    return final_sections
+
+def smart_medical_chunker(
+    text: str, 
+    chunk_size: int = 1000, 
+    chunk_overlap: int = 200
+) -> List[Dict[str, Any]]:
+    """
+    Smart medical text chunking that preserves section boundaries
+    Returns: List of chunks with metadata
+    """
+    # Clean text
+    cleaned = minimal_clean_text(text)
+    
+    # Detect sections
+    sections = detect_medical_sections(cleaned)
+    
+    chunks: List[Dict[str, Any]] = []
+    chunk_id = 0
+    
+    if not sections:
+        # No sections found - fall back to regular chunking
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            separators=["\n\n", "\n", ". ", ".", " "],
+        )
+        
+        for i, chunk_text in enumerate(splitter.split_text(cleaned)):
+            # Find position in original text
+            start_pos = cleaned.find(chunk_text)
+            chunks.append({
+                "text": chunk_text,
+                "metadata": {
+                    "chunk_id": i,
+                    "section": "unknown",
+                    "start_pos": start_pos,
+                    "end_pos": start_pos + len(chunk_text) if start_pos != -1 else -1,
+                    "source_type": "regular_chunk",
+                }
+            })
+        return chunks
+    
+    # Process each section
+    for name, start, end in sections:
+        section_text = cleaned[start:end]
+        
+        if len(section_text) <= chunk_size:
+            # Section fits in one chunk
+            chunks.append({
+                "text": section_text,
+                "metadata": {
+                    "chunk_id": chunk_id,
+                    "section": name,
+                    "start_pos": start,
+                    "end_pos": end,
+                    "source_type": "section_chunk",
+                }
+            })
+            chunk_id += 1
+        else:
+            # Section needs to be split
+            from langchain.text_splitter import RecursiveCharacterTextSplitter
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                separators=["\n\n", "\n", ". ", ".", " "],
+            )
+            
+            for i, sub_chunk in enumerate(splitter.split_text(section_text)):
+                # Calculate position within section
+                sub_start = section_text.find(sub_chunk)
+                actual_start = start + sub_start if sub_start != -1 else start
+                
+                chunks.append({
+                    "text": sub_chunk,
+                    "metadata": {
+                        "chunk_id": chunk_id,
+                        "section": name,
+                        "section_part": i,
+                        "start_pos": actual_start,
+                        "end_pos": actual_start + len(sub_chunk),
+                        "source_type": "section_subchunk",
+                    }
+                })
+                chunk_id += 1
+    
+    return chunks
+
+def minimal_clean_text(text: str) -> str:
+    """
+    Minimal text cleaning to preserve medical information
+    """
+    if not text or not isinstance(text, str):
+        return ""
+    
+    # Replace smart quotes and special characters
+    text = (
+        text.replace('"', '"')
+        .replace('"', '"')
+        .replace("'", "'")
+        .replace("'", "'")
+        .replace("–", "-")
+        .replace("—", "-")
+        .replace("…", "...")
+    )
+    
+    # Remove non-printable characters except newlines, tabs
+    text = "".join(ch for ch in text if ord(ch) >= 32 or ch in "\n\t\r")
+    
+    # Normalize excessive newlines
+    text = re.sub(r"\n{4,}", "\n\n\n", text)
+    
+    return text.strip()
+
+def extract_evidence_with_positions(
+    text: str,
+    extraction_type: str,
+    extracted_values: Dict[str, Any]
+) -> List[Dict[str, Any]]:
+    """
+    Extract evidence for LLM extraction with character positions
+    """
+    evidence = []
+    
+    if extraction_type == "medications":
+        # Extract medication evidence
+        med_mentions = extract_medication_mentions(text)
+        
+        for med_type, mention, start, end in med_mentions:
+            # Get context around mention
+            context, ctx_start, ctx_end = highlight_in_context(text, start, end, 100)
+            
+            evidence.append({
+                "type": med_type,
+                "text": context,
+                "mention": mention,
+                "start_pos": start,
+                "end_pos": end,
+                "context_start": ctx_start,
+                "context_end": ctx_end,
+                "relevance": 0.9,
+                "source": "pattern_match"
+            })
+    
+    elif extraction_type == "radiation_date":
+        # Extract date evidence
+        date_mentions = extract_date_mentions(text)
+        
+        # Look for radiation-related context
+        radiation_keywords = ["radiation", "xrt", "rt", "radiotherapy", "irradiation"]
+        
+        for date_str, start, end in date_mentions:
+            # Check if radiation keyword nearby
+            context_start = max(0, start - 200)
+            context_end = min(len(text), end + 200)
+            context = text[context_start:context_end].lower()
+            
+            relevance = 0.5  # Base relevance for any date
+            for keyword in radiation_keywords:
+                if keyword in context:
+                    relevance = 0.9
+                    break
+            
+            # Get display context
+            display_context, ctx_start, ctx_end = highlight_in_context(text, start, end, 100)
+            
+            evidence.append({
+                "type": "radiation_date",
+                "text": display_context,
+                "date": date_str,
+                "start_pos": start,
+                "end_pos": end,
+                "context_start": ctx_start,
+                "context_end": ctx_end,
+                "relevance": relevance,
+                "source": "pattern_match"
+            })
+    
+    # Sort by relevance
+    evidence.sort(key=lambda x: x["relevance"], reverse=True)
+    
+    return evidence[:5]  # Return top 5 evidence items

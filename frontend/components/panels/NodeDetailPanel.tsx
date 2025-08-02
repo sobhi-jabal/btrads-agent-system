@@ -121,7 +121,7 @@ export function NodeDetailPanel({ nodeId, open, onClose }: NodeDetailPanelProps)
                     <CardTitle className="text-sm">Source Evidence</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {result.source_highlights.map((highlight, idx) => (
+                    {result.source_highlights.map((highlight: any, idx: number) => (
                       <div key={idx} className="p-2 bg-muted rounded">
                         <p className="text-sm italic">"{highlight.text}"</p>
                         <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -145,7 +145,7 @@ export function NodeDetailPanel({ nodeId, open, onClose }: NodeDetailPanelProps)
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {result.missing_info.map((info, idx) => (
+                    {result.missing_info.map((info: any, idx: number) => (
                       <div key={idx} className="text-sm text-amber-800">
                         <p className="font-medium">{info.field}</p>
                         <p className="text-xs mt-1">{info.reason}</p>

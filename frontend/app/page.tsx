@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
   FileText, 
   Upload, 
@@ -22,7 +23,10 @@ import {
   ChevronUp,
   Database,
   FileSpreadsheet,
-  Check
+  Check,
+  Brain,
+  Zap,
+  Settings
 } from "lucide-react";
 import { BTRADSDecisionFlow } from "@/components/flow/BTRADSDecisionFlow";
 import { CSVValidator } from "@/components/csv/CSVValidator";
@@ -42,11 +46,30 @@ export default function Home() {
   
   // Expandable sections state
   const [expandedSection, setExpandedSection] = useState<string | null>("new-analysis");
+  
+  // Processing tracking state
+  const [processedPatientIds, setProcessedPatientIds] = useState<Set<string>>(new Set());
+  const [allPatients, setAllPatients] = useState<any[]>([]);
+  
+  // Extraction settings
+  const [extractionMode, setExtractionMode] = useState<'nlp' | 'llm' | 'both'>('nlp');
 
   // Debug logging
   useEffect(() => {
     console.log("Home component mounted");
+    fetchAllPatients();
   }, []);
+  
+  // Fetch all patients
+  const fetchAllPatients = async () => {
+    try {
+      const patients = await api.patients.list();
+      setAllPatients(patients);
+      setUploadedPatients(patients);
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -223,18 +246,88 @@ export default function Home() {
 
   const processPatient = async (patient: any) => {
     setActivePatientId(patient.id);
-    setIsProcessing(true);
     setError(null);
+    setSuccess(null);
+    // Just set the patient and expand results - BTRADSDecisionFlow will handle the actual processing
+    setExpandedSection("results");
+  };
+  
+  // Mark patient as processed
+  const markPatientAsProcessed = (patientId: string) => {
+    setProcessedPatientIds(prev => new Set(prev).add(patientId));
+  };
+  
+  // Find next unprocessed patient
+  const findNextUnprocessedPatient = (currentId: string): string | null => {
+    const currentIndex = allPatients.findIndex(p => p.id === currentId);
+    if (currentIndex === -1) return null;
     
-    try {
-      await api.patients.startProcessing(patient.id, false);
-      setSuccess(`Started processing patient ${patient.id}`);
-      setExpandedSection("results");
-    } catch (error) {
-      console.error("Error processing patient:", error);
-      setError(`Failed to process patient ${patient.id}`);
-    } finally {
-      setIsProcessing(false);
+    // Search forward from current position
+    for (let i = currentIndex + 1; i < allPatients.length; i++) {
+      if (!processedPatientIds.has(allPatients[i].id)) {
+        return allPatients[i].id;
+      }
+    }
+    
+    // Wrap around to beginning
+    for (let i = 0; i < currentIndex; i++) {
+      if (!processedPatientIds.has(allPatients[i].id)) {
+        return allPatients[i].id;
+      }
+    }
+    
+    return null;
+  };
+  
+  // Find previous unprocessed patient
+  const findPreviousUnprocessedPatient = (currentId: string): string | null => {
+    const currentIndex = allPatients.findIndex(p => p.id === currentId);
+    if (currentIndex === -1) return null;
+    
+    // Search backward from current position
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      if (!processedPatientIds.has(allPatients[i].id)) {
+        return allPatients[i].id;
+      }
+    }
+    
+    // Wrap around to end
+    for (let i = allPatients.length - 1; i > currentIndex; i--) {
+      if (!processedPatientIds.has(allPatients[i].id)) {
+        return allPatients[i].id;
+      }
+    }
+    
+    return null;
+  };
+  
+  // Process next patient
+  const processNextPatient = () => {
+    if (!activePatientId) return;
+    
+    const nextId = findNextUnprocessedPatient(activePatientId);
+    if (nextId) {
+      const nextPatient = allPatients.find(p => p.id === nextId);
+      if (nextPatient) {
+        processPatient(nextPatient);
+      }
+    } else {
+      setSuccess("All patients have been processed!");
+    }
+  };
+  
+  // Process previous patient
+  const processPreviousPatient = () => {
+    if (!activePatientId) return;
+    
+    const prevId = findPreviousUnprocessedPatient(activePatientId);
+    if (prevId) {
+      const prevPatient = allPatients.find(p => p.id === prevId);
+      if (prevPatient) {
+        processPatient(prevPatient);
+      }
+    } else {
+      setSuccess("No previous unprocessed patients found.");
     }
   };
 
@@ -340,6 +433,106 @@ export default function Home() {
                         </>
                       )}
                     </Button>
+                  </div>
+                </CardContent>
+              </>
+            )}
+          </Card>
+
+          {/* Connecting line */}
+          {expandedSection !== "results" && expandedSection !== "extraction-settings" && (
+            <div className="flex justify-center">
+              <div className="w-0.5 h-12 bg-border"></div>
+            </div>
+          )}
+
+          {/* Extraction Settings Section */}
+          <Card className={`shadow-soft transition-all duration-300 ${
+            expandedSection === "extraction-settings" ? "shadow-soft-lg" : ""
+          }`}>
+            <CardHeader 
+              className="cursor-pointer"
+              onClick={() => toggleSection("extraction-settings")}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-md">
+                    <Settings className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Extraction Settings</CardTitle>
+                    <CardDescription>
+                      Configure how medication and radiation data is extracted
+                    </CardDescription>
+                  </div>
+                </div>
+                {expandedSection === "extraction-settings" ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+            </CardHeader>
+            
+            {expandedSection === "extraction-settings" && (
+              <>
+                <Separator />
+                <CardContent className="space-y-6 pt-6">
+                  <div>
+                    <Label className="text-base font-medium mb-3 block">
+                      Select Extraction Method
+                    </Label>
+                    <RadioGroup value={extractionMode} onValueChange={(value) => setExtractionMode(value as 'nlp' | 'llm' | 'both')}>
+                      <div className="space-y-4">
+                        <Label className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50">
+                          <RadioGroupItem value="nlp" className="mt-1" />
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Zap className="h-4 w-4 text-yellow-600" />
+                              <span className="font-medium">NLP Pattern Matching</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Fast, regex-based extraction using predefined patterns. Best for standard report formats.
+                            </p>
+                          </div>
+                        </Label>
+                        
+                        <Label className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50">
+                          <RadioGroupItem value="llm" className="mt-1" />
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Brain className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium">LLM Analysis (Ollama phi4:14b)</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              AI-powered, context-aware extraction for complex cases. Requires Ollama running locally.
+                            </p>
+                          </div>
+                        </Label>
+                        
+                        <Label className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50">
+                          <RadioGroupItem value="both" className="mt-1" />
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Activity className="h-4 w-4 text-green-600" />
+                              <span className="font-medium">Both Methods</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Compare results from both NLP and LLM extraction. Useful for validation and testing.
+                            </p>
+                          </div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  
+                  <div className="rounded-lg bg-muted/50 p-4">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Current selection:</strong> {extractionMode === 'nlp' ? 'NLP Pattern Matching' : extractionMode === 'llm' ? 'LLM Analysis' : 'Both Methods'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This setting will be used for all subsequent analyses until changed.
+                    </p>
                   </div>
                 </CardContent>
               </>
@@ -529,7 +722,18 @@ export default function Home() {
                 <CardContent className="p-6">
                   <BTRADSDecisionFlow 
                     patientId={activePatientId}
-                    onProcessingComplete={(result) => console.log("Processing complete:", result)}
+                    autoStart={true}
+                    onProcessingComplete={(result) => {
+                      console.log("Processing complete:", result);
+                      markPatientAsProcessed(activePatientId);
+                    }}
+                    onProcessNext={processNextPatient}
+                    onProcessPrevious={processPreviousPatient}
+                    hasNextPatient={!!findNextUnprocessedPatient(activePatientId)}
+                    hasPreviousPatient={!!findPreviousUnprocessedPatient(activePatientId)}
+                    remainingCount={allPatients.length - processedPatientIds.size}
+                    completedCount={processedPatientIds.size}
+                    extractionMode={extractionMode}
                   />
                 </CardContent>
               </>
