@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import List, Optional
 import pandas as pd
 import io
+import os
 
 from models.patient import Patient, PatientData
 
@@ -57,16 +58,35 @@ async def get_patient(patient_id: str):
     return patient
 
 @router.post("/{patient_id}/process")
-async def start_processing(patient_id: str, auto_validate: bool = False):
-    """Start processing a patient through BT-RADS flowchart"""
+async def start_processing(
+    patient_id: str, 
+    auto_validate: Optional[bool] = None
+):
+    """Start processing a patient through BT-RADS flowchart
+    
+    Args:
+        patient_id: Patient identifier
+        auto_validate: If True, automatically accept LLM extractions. 
+                      If False, require manual validation for each step.
+                      If None, uses DEFAULT_VALIDATION_MODE from environment.
+    """
     patient = await patient_service.get_patient(patient_id)
     if not patient:
         raise HTTPException(404, "Patient not found")
     
+    # Use default validation mode if not specified
+    if auto_validate is None:
+        default_mode = os.getenv("DEFAULT_VALIDATION_MODE", "auto")
+        auto_validate = default_mode == "auto"
+    
     # Start async processing
     await patient_service.start_processing(patient_id, auto_validate)
     
-    return {"message": "Processing started", "patient_id": patient_id}
+    return {
+        "message": "Processing started", 
+        "patient_id": patient_id,
+        "auto_validate": auto_validate
+    }
 
 @router.get("/{patient_id}/status")
 async def get_processing_status(patient_id: str):

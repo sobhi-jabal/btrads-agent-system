@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: btrads-vllm
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      --model meta-llama/Meta-Llama-3.1-8B-Instruct
+      --max-model-len 8192
+      --gpu-memory-utilization 0.9
+      --dtype half
+      --enforce-eager
+      --api-key ${VLLM_API_KEY:-}
+      --port 8000
+      --host 0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Alternative CPU-only deployment for development
+  vllm-cpu:
+    image: vllm/vllm-openai:latest
+    container_name: btrads-vllm-cpu
+    profiles: ["cpu"]
+    ports:
+      - "8001:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - VLLM_CPU_ONLY=1
+    command: >
+      --model TinyLlama/TinyLlama-1.1B-Chat-v1.0
+      --max-model-len 2048
+      --dtype float32
+      --device cpu
+      --port 8000
+      --host 0.0.0.0
+    restart: unless-stopped
+
+networks:
+  default:
+    name: btrads-network
+    external: true

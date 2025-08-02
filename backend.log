@@ -1,247 +1,583 @@
-INFO:     Started server process [79540]
+INFO:     Will watch for changes in these directories: ['/Users/sobhi/Desktop/Claude_Code/Duke/Evan/BTRADS_Agents/btrads-agent-system/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [71177] using WatchFiles
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [71185]
 INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-Starting BT-RADS Mock Backend on http://localhost:8000
-API Documentation available at http://localhost:8000/docs
-INFO:     127.0.0.1:49521 - "GET / HTTP/1.1" 200 OK
-Received file: test_upload.csv
-Parsed 2 patients from CSV
-INFO:     127.0.0.1:49633 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49657 - "GET /api/patients HTTP/1.1" 200 OK
-Received file: input_file_id (version 1) - (Run) - (mL) - (Pre-UI) - (Sample).csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:49680 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49699 - "GET /api/patients HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:49880 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49880 - "OPTIONS /api/patients/PAT_20250731093835_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49880 - "POST /api/patients/PAT_20250731093835_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50568 - "GET /api/patients HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:50602 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50602 - "OPTIONS /api/patients/PAT_20250731094822_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50602 - "POST /api/patients/PAT_20250731094822_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50738 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50762 - "GET /api/patients/PAT_20250731094822_000 HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:50854 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50854 - "OPTIONS /api/patients/PAT_20250731095505_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50854 - "POST /api/patients/PAT_20250731095505_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50854 - "GET /api/patients/PAT_20250731095505_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50859 - "POST /api/patients/PAT_20250731095505_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51258 - "GET /api/patients/PAT_20250731095505_000 HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:51687 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51687 - "OPTIONS /api/patients/PAT_20250731101655_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51687 - "POST /api/patients/PAT_20250731101655_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51687 - "GET /api/patients/PAT_20250731101655_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51687 - "POST /api/patients/PAT_20250731101655_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52107 - "GET /api/patients/PAT_20250731101655_000 HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:52583 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52583 - "OPTIONS /api/patients/PAT_20250731103114_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52583 - "POST /api/patients/PAT_20250731103114_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52583 - "GET /api/patients/PAT_20250731103114_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52583 - "POST /api/patients/PAT_20250731103114_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:53169 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53169 - "OPTIONS /api/patients/PAT_20250731104319_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53169 - "POST /api/patients/PAT_20250731104319_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53169 - "GET /api/patients/PAT_20250731104319_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53169 - "POST /api/patients/PAT_20250731104319_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:54480 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54480 - "OPTIONS /api/patients/PAT_20250731110722_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54480 - "POST /api/patients/PAT_20250731110722_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54480 - "GET /api/patients/PAT_20250731110722_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54480 - "POST /api/patients/PAT_20250731110722_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:54662 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54662 - "OPTIONS /api/patients/PAT_20250731111322_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54662 - "POST /api/patients/PAT_20250731111322_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54662 - "GET /api/patients/PAT_20250731111322_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54662 - "POST /api/patients/PAT_20250731111322_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:54949 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54949 - "OPTIONS /api/patients/PAT_20250731111904_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54949 - "POST /api/patients/PAT_20250731111904_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54949 - "GET /api/patients/PAT_20250731111904_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54949 - "POST /api/patients/PAT_20250731111904_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:55446 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55446 - "OPTIONS /api/patients/PAT_20250731112401_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55446 - "POST /api/patients/PAT_20250731112401_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55446 - "GET /api/patients/PAT_20250731112401_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55446 - "POST /api/patients/PAT_20250731112401_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:56497 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56497 - "OPTIONS /api/patients/PAT_20250731113624_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56497 - "POST /api/patients/PAT_20250731113624_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56497 - "GET /api/patients/PAT_20250731113624_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56497 - "POST /api/patients/PAT_20250731113624_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56498 - "POST /api/patients/PAT_20250731113624_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56497 - "POST /api/patients/PAT_20250731113624_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:57167 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57167 - "OPTIONS /api/patients/PAT_20250731114404_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57167 - "POST /api/patients/PAT_20250731114404_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57167 - "GET /api/patients/PAT_20250731114404_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57167 - "POST /api/patients/PAT_20250731114404_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57168 - "POST /api/patients/PAT_20250731114404_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57167 - "POST /api/patients/PAT_20250731114404_001/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:57505 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57505 - "OPTIONS /api/patients/PAT_20250731114728_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57505 - "POST /api/patients/PAT_20250731114728_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57505 - "GET /api/patients/PAT_20250731114728_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57505 - "POST /api/patients/PAT_20250731114728_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57506 - "POST /api/patients/PAT_20250731114728_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57505 - "POST /api/patients/PAT_20250731114728_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57523 - "OPTIONS /api/patients/PAT_20250731114728_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57523 - "POST /api/patients/PAT_20250731114728_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57523 - "GET /api/patients/PAT_20250731114728_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57523 - "POST /api/patients/PAT_20250731114728_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57524 - "POST /api/patients/PAT_20250731114728_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57523 - "POST /api/patients/PAT_20250731114728_000/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:57853 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57853 - "OPTIONS /api/patients/PAT_20250731115305_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57853 - "POST /api/patients/PAT_20250731115305_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57853 - "GET /api/patients/PAT_20250731115305_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57853 - "POST /api/patients/PAT_20250731115305_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57854 - "POST /api/patients/PAT_20250731115305_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57853 - "POST /api/patients/PAT_20250731115305_001/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:58110 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58110 - "OPTIONS /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58110 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58110 - "GET /api/patients/PAT_20250731115956_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58110 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58111 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58110 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58526 - "GET /api/patients/PAT_20250731115956_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58526 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58527 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58526 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58668 - "GET /api/patients/PAT_20250731115956_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58668 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58669 - "POST /api/patients/PAT_20250731115956_001/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:58894 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58894 - "OPTIONS /api/patients/PAT_20250731120824_002/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58894 - "POST /api/patients/PAT_20250731120824_002/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58894 - "GET /api/patients/PAT_20250731120824_002 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58894 - "POST /api/patients/PAT_20250731120824_002/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58895 - "POST /api/patients/PAT_20250731120824_002/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58894 - "POST /api/patients/PAT_20250731120824_002/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:59333 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59335 - "OPTIONS /api/patients/PAT_20250731121601_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59335 - "POST /api/patients/PAT_20250731121601_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59335 - "GET /api/patients/PAT_20250731121601_003 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59335 - "POST /api/patients/PAT_20250731121601_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59336 - "POST /api/patients/PAT_20250731121601_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59335 - "POST /api/patients/PAT_20250731121601_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59922 - "GET /api/patients/PAT_20250731121601_003 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59922 - "POST /api/patients/PAT_20250731121601_003/process?auto_validate=false HTTP/1.1" 200 OK
-Received file: validated_data.csv
-Parsed 20 patients from CSV
-INFO:     127.0.0.1:60286 - "POST /api/patients/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60286 - "OPTIONS /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60286 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60286 - "GET /api/patients/PAT_20250731122538_004 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60286 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60287 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60286 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60549 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60549 - "OPTIONS /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60549 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60549 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60549 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60550 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60549 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60596 - "OPTIONS /api/patients/PAT_20250731122538_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60597 - "GET /api/patients/PAT_20250731122538_001 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60596 - "POST /api/patients/PAT_20250731122538_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60597 - "POST /api/patients/PAT_20250731122538_001/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60596 - "OPTIONS /api/patients/PAT_20250731122538_002/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60597 - "GET /api/patients/PAT_20250731122538_002 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60596 - "POST /api/patients/PAT_20250731122538_002/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60597 - "OPTIONS /api/patients/PAT_20250731122538_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60596 - "GET /api/patients/PAT_20250731122538_003 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60597 - "POST /api/patients/PAT_20250731122538_003/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60601 - "OPTIONS /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60602 - "GET /api/patients/PAT_20250731122538_004 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60601 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60602 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62529 - "GET /api/patients/PAT_20250731122538_004 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62529 - "OPTIONS /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62529 - "POST /api/patients/PAT_20250731122538_004/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62529 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62533 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62533 - "OPTIONS /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62533 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62533 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62533 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62534 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62550 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62554 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62554 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62554 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62557 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62570 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62994 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63321 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63323 - "OPTIONS /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63323 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63323 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63323 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63324 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63323 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63332 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63338 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63338 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63338 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63339 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63338 - "OPTIONS /api/llm/extract HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63339 - "OPTIONS /api/llm/extract HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63338 - "POST /api/llm/extract HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:63339 - "POST /api/llm/extract HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:63338 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63349 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64821 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64856 - "OPTIONS /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64856 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64856 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64856 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64857 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64856 - "OPTIONS /api/llm/extract HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64857 - "OPTIONS /api/llm/extract HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64856 - "POST /api/llm/extract HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:64857 - "POST /api/llm/extract HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:64931 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64960 - "GET /api/patients HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64960 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64960 - "GET /api/patients/PAT_20250731122538_000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64960 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64961 - "POST /api/patients/PAT_20250731122538_000/process?auto_validate=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64960 - "POST /api/llm/extract HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:64961 - "POST /api/llm/extract HTTP/1.1" 404 Not Found
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:63674 - "POST /api/llm/extract HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [71185]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [72824]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72824]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [72896]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72896]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [72939]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72939]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [72972]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72972]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [73045]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [73045]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [73093]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'vllm': False, 'ollama': True, 'postgres': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'services/ollama_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [73093]
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [73163]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ PostgreSQL not available: role "postgres" does not exist
+ERROR:utils.startup_checks:❌ vLLM service not available: Cannot connect to host localhost:8000 ssl:default [Multiple exceptions: [Errno 61] Connect call failed ('::1', 8000, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 8000)]
+INFO:utils.startup_checks:Using Ollama mode (fallback)
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'redis': False, 'ollama': True, 'postgres': False, 'vllm': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to database: role "postgres" does not exist
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.

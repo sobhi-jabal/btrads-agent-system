@@ -4,13 +4,15 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Brain, Zap, Clock, CheckCircle, XCircle } from "lucide-react"
 import type { ExtractionResult } from './ExtractionFunctions'
+import { EvidenceHighlight } from './EvidenceHighlight'
 
 interface ExtractionComparisonProps {
   results: ExtractionResult
   extractionMode: 'nlp' | 'llm' | 'both'
+  clinicalNote?: string
 }
 
-export function ExtractionComparison({ results, extractionMode }: ExtractionComparisonProps) {
+export function ExtractionComparison({ results, extractionMode, clinicalNote }: ExtractionComparisonProps) {
   if (extractionMode !== 'both' || !results.nlp || !results.llm) {
     return null
   }
@@ -21,8 +23,9 @@ export function ExtractionComparison({ results, extractionMode }: ExtractionComp
   const llmRad = results.llm.radiationDate
 
   return (
-    <Card className="mt-4 border-2 border-primary/20">
-      <CardHeader>
+    <>
+      <Card className="mt-4 border-2 border-primary/20">
+        <CardHeader>
         <CardTitle className="text-lg">Extraction Method Comparison</CardTitle>
         <CardDescription>Compare results from NLP and LLM extraction methods</CardDescription>
       </CardHeader>
@@ -172,5 +175,82 @@ export function ExtractionComparison({ results, extractionMode }: ExtractionComp
         </Tabs>
       </CardContent>
     </Card>
+
+    {/* Evidence Highlighting Section */}
+    {clinicalNote && (
+      <div className="mt-6 space-y-6">
+        <Tabs defaultValue="nlp" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="nlp">NLP Evidence</TabsTrigger>
+            <TabsTrigger value="llm">LLM Evidence</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="nlp" className="mt-4">
+            {/* NLP Medication Evidence */}
+            {nlpMeds?.evidence && nlpMeds.evidence.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-yellow-600" />
+                  NLP Medication Extraction Evidence
+                </h4>
+                <EvidenceHighlight
+                  clinicalNote={clinicalNote}
+                  evidence={nlpMeds.evidence}
+                  extractionType="medications"
+                />
+              </div>
+            )}
+            
+            {/* NLP Radiation Evidence */}
+            {nlpRad?.evidence && nlpRad.evidence.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-yellow-600" />
+                  NLP Radiation Date Extraction Evidence
+                </h4>
+                <EvidenceHighlight
+                  clinicalNote={clinicalNote}
+                  evidence={nlpRad.evidence}
+                  extractionType="radiation_date"
+                />
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="llm" className="mt-4">
+            {/* LLM Medication Evidence */}
+            {llmMeds?.evidence && llmMeds.evidence.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-blue-600" />
+                  LLM Medication Analysis Evidence
+                </h4>
+                <EvidenceHighlight
+                  clinicalNote={clinicalNote}
+                  evidence={llmMeds.evidence}
+                  extractionType="medications"
+                />
+              </div>
+            )}
+            
+            {/* LLM Radiation Evidence */}
+            {llmRad?.evidence && llmRad.evidence.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-blue-600" />
+                  LLM Radiation Date Analysis Evidence
+                </h4>
+                <EvidenceHighlight
+                  clinicalNote={clinicalNote}
+                  evidence={llmRad.evidence}
+                  extractionType="radiation_date"
+                />
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    )}
+    </>
   )
 }

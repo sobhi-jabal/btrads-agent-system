@@ -1,6 +1,7 @@
 // Extraction helper functions for BT-RADS Decision Flow
 import { api } from '@/lib/api/client'
 import type { ExtractionResult as MissingInfoExtractionResult } from '@/types/missing-info'
+import type { EvidenceItem } from '@/components/evidence/EvidenceHighlighter'
 
 export type ExtractionMode = 'nlp' | 'llm' | 'both'
 
@@ -38,6 +39,34 @@ export interface ExtractionResult {
       error?: string
     }
   }
+}
+
+// Transform backend evidence to EvidenceHighlighter format
+export const transformEvidence = (evidence: any[], clinicalNote?: string): EvidenceItem[] => {
+  return evidence.map((item, index) => {
+    // Extract full context if available
+    let fullContext = ''
+    if (clinicalNote && item.context_start !== undefined && item.context_end !== undefined) {
+      fullContext = clinicalNote.substring(item.context_start, item.context_end).trim()
+    } else if (item.text) {
+      fullContext = item.text
+    }
+    
+    return {
+      id: `evidence-${index}-${item.start_pos || index}`,
+      sourceText: item.matched_text || item.mention || item.text || '',
+      matchedPattern: item.pattern || 'unknown',
+      confidence: item.confidence > 0.85 ? 'high' : item.confidence > 0.7 ? 'medium' : 'low',
+      startIndex: item.start_pos || item.context_start || 0,
+      endIndex: item.end_pos || item.context_end || 0,
+      category: item.category || item.type || 'general',
+      alternatives: [],
+      reasoning: item.pattern_type ? `Pattern type: ${item.pattern_type}` : undefined,
+      relevanceScore: item.relevance_score || item.relevance,
+      patternType: item.pattern_type,
+      fullContext: fullContext
+    }
+  })
 }
 
 export const extractMedicationsNLP = (text: string): MissingInfoExtractionResult => {
@@ -109,7 +138,14 @@ export const extractMedicationsNLP = (text: string): MissingInfoExtractionResult
         const end = Math.min(originalText.length, match.index + match[0].length + 50)
         evidence.push({
           type: 'avastin',
-          text: originalText.slice(start, end),
+          text: match[0],
+          mention: match[0],
+          start_pos: match.index,
+          end_pos: match.index + match[0].length,
+          context_start: start,
+          context_end: end,
+          relevance: 0.8,
+          source: 'nlp_pattern',
           pattern: pattern.source,
           medication: 'avastin'
         })
@@ -126,7 +162,14 @@ export const extractMedicationsNLP = (text: string): MissingInfoExtractionResult
         const end = Math.min(originalText.length, match.index + match[0].length + 50)
         evidence.push({
           type: 'steroid',
-          text: originalText.slice(start, end),
+          text: match[0],
+          mention: match[0],
+          start_pos: match.index,
+          end_pos: match.index + match[0].length,
+          context_start: start,
+          context_end: end,
+          relevance: 0.8,
+          source: 'nlp_pattern',
           pattern: pattern.source,
           medication: 'steroid'
         })
@@ -162,7 +205,7 @@ export const extractMedicationsNLP = (text: string): MissingInfoExtractionResult
     confidence,
     isMissing,
     source: 'nlp_pattern_matching',
-    evidence: evidence.map(e => e.text)
+    evidence: evidence.slice(0, 5) // Return full evidence objects, not just text
   }
 }
 
@@ -178,7 +221,10 @@ export const extractRadiationDateNLP = (text: string): MissingInfoExtractionResu
   const singleDatePatterns = [
     /radiation.*?complet\w*.*?(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
     /(?:xrt|rt|radiotherapy).*?(?:complet\w*|finish\w*).*?(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
-    /(\d{1,2}\/\d{1,2}\/\d{2,4}).*?radiation.*?complet/gi
+    /(\d{1,2}\/\d{1,2}\/\d{2,4}).*?radiation.*?complet/gi,
+    /started\s+on\s+(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
+    /last\s+dosed?\s+on\s+(\d{1,2}\/\d{1,2}\/\d{2,4})/gi,
+    /(\d{1,2}\/\d{1,2}\/\d{2,4})\s*\(.*?(?:radiation|xrt|therapy)/gi
   ]
   
   // Check for radiation mentions without dates
@@ -208,10 +254,16 @@ export const extractRadiationDateNLP = (text: string): MissingInfoExtractionResu
       const end = Math.min(text.length, match.index! + match[0].length + 50)
       evidence.push({
         type: 'radiation_date_range',
-        text: text.slice(start, end),
+        text: match[0],
+        date: radiationDate,
+        start_pos: match.index!,
+        end_pos: match.index! + match[0].length,
+        context_start: start,
+        context_end: end,
+        relevance: 0.9,
+        source: 'nlp_pattern',
         startDate: match[1],
         endDate: match[2],
-        date: radiationDate,
         pattern: pattern.source
       })
       confidence = 95 // High confidence with date range
@@ -229,8 +281,14 @@ export const extractRadiationDateNLP = (text: string): MissingInfoExtractionResu
         const end = Math.min(text.length, match.index! + match[0].length + 50)
         evidence.push({
           type: 'radiation_date',
-          text: text.slice(start, end),
+          text: match[0],
           date: radiationDate,
+          start_pos: match.index!,
+          end_pos: match.index! + match[0].length,
+          context_start: start,
+          context_end: end,
+          relevance: 0.85,
+          source: 'nlp_pattern',
           pattern: pattern.source
         })
         confidence = 85 // Good confidence with single date
@@ -258,7 +316,7 @@ export const extractRadiationDateNLP = (text: string): MissingInfoExtractionResu
     confidence,
     isMissing,
     source: 'nlp_pattern_matching',
-    evidence: evidence.map(e => e.text)
+    evidence: evidence // Return full evidence objects
   }
 }
 
@@ -284,8 +342,8 @@ export const extractDataPointsNLP = (text: string) => {
   }
 }
 
-// Separate LLM extraction - optional, can fail gracefully
-export const extractDataPointsLLM = async (text: string) => {
+// LLM extraction using Ollama with phi4
+export const extractDataPointsLLM = async (text: string, followupDate?: string) => {
   try {
     const [medicationsResponse, radiationResponse] = await Promise.all([
       api.llm.extract({
@@ -307,41 +365,62 @@ export const extractDataPointsLLM = async (text: string) => {
     return {
       medications: {
         ...medicationsResponse,
-        isMissing: medConfidence < 50 || 
-          (medicationsResponse.data?.steroid_status === 'unknown' && 
-           medicationsResponse.data?.avastin_status === 'unknown')
+        isMissing: false  // LLM extraction succeeded, even if values are "unknown"
       },
       radiationDate: {
         ...radiationResponse,
-        isMissing: radConfidence < 50 || 
-          radiationResponse.data?.radiation_date === 'unknown'
+        isMissing: false  // LLM extraction succeeded, even if values are "unknown"
       }
     }
   } catch (error) {
-    console.error('LLM extraction error:', error)
-    // Return null on error - let the caller handle it
-    return null
+    console.error('LLM extraction failed:', error)
+    // Return error state with isMissing = true
+    return {
+      medications: {
+        data: null,
+        error: error.message || 'LLM extraction failed',
+        confidence: 0,
+        processing_time: 0,
+        isMissing: true,  // Mark as missing when extraction actually fails
+        evidence: []
+      },
+      radiationDate: {
+        data: null,
+        error: error.message || 'LLM extraction failed',
+        confidence: 0,
+        processing_time: 0,
+        isMissing: true,  // Mark as missing when extraction actually fails
+        evidence: []
+      }
+    }
   }
 }
 
 // Main orchestrator function - coordinates NLP and LLM extraction
-export const extractDataPoints = async (text: string, mode: ExtractionMode): Promise<ExtractionResult> => {
+export const extractDataPoints = async (text: string, mode: ExtractionMode, followupDate?: string): Promise<ExtractionResult> => {
   const results: ExtractionResult = {}
   
-  // Always run NLP extraction first (never fails)
-  if (mode === 'nlp' || mode === 'both') {
-    results.nlp = extractDataPointsNLP(text)
-  }
+  console.log(`[Extraction] Starting extraction with mode: ${mode}`)
   
-  // Then try LLM if requested
-  if (mode === 'llm' || mode === 'both') {
-    const llmResults = await extractDataPointsLLM(text)
-    if (llmResults) {
+  try {
+    // Extract based on mode - no fallbacks
+    if (mode === 'nlp') {
+      results.nlp = extractDataPointsNLP(text)
+      console.log('[Extraction] NLP results:', results.nlp)
+    } else if (mode === 'llm') {
+      const llmResults = await extractDataPointsLLM(text, followupDate)
       results.llm = llmResults
-    } else {
-      // LLM failed but we can continue with NLP results
-      console.log('LLM extraction failed, continuing with NLP results only')
+      console.log('[Extraction] LLM results:', results.llm)
+    } else if (mode === 'both') {
+      // Run both independently
+      results.nlp = extractDataPointsNLP(text)
+      const llmResults = await extractDataPointsLLM(text, followupDate)
+      results.llm = llmResults
+      console.log('[Extraction] Both results:', { nlp: results.nlp, llm: results.llm })
     }
+  } catch (error) {
+    console.error('[Extraction] Error during extraction:', error)
+    throw error // Re-throw to handle in parent
   }
   
   return results

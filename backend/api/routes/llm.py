@@ -16,8 +16,10 @@ ollama_service = OllamaExtractionService(model="phi4:14b")
 class ExtractionRequest(BaseModel):
     """Request model for LLM extraction"""
     clinical_note: str
-    extraction_type: Literal["medications", "radiation_date"]
+    extraction_type: Literal["medications", "radiation_date", "suitable_prior", "imaging_assessment", 
+                           "on_medications", "avastin_response", "steroid_effects", "time_since_xrt"]
     model: Optional[str] = "phi4:14b"
+    context_data: Optional[Dict[str, Any]] = None
 
 
 class ExtractionResponse(BaseModel):
@@ -39,6 +41,12 @@ async def extract_information(request: ExtractionRequest):
     Supports:
     - medications: Extract steroid and Avastin status
     - radiation_date: Extract radiation completion date
+    - suitable_prior: Check for prior imaging availability
+    - imaging_assessment: Compare current vs prior imaging
+    - on_medications: Determine medication effects on improvement
+    - avastin_response: Analyze Avastin response type
+    - steroid_effects: Analyze steroid effect timing
+    - time_since_xrt: Apply 90-day radiation rule
     """
     try:
         if not request.clinical_note.strip():
@@ -55,6 +63,14 @@ async def extract_information(request: ExtractionRequest):
             result = await extraction_service.extract_medications(request.clinical_note)
         elif request.extraction_type == "radiation_date":
             result = await extraction_service.extract_radiation_date(request.clinical_note)
+        elif request.extraction_type in ["suitable_prior", "imaging_assessment", "on_medications", 
+                                       "avastin_response", "steroid_effects", "time_since_xrt"]:
+            # BT-RADS flowchart nodes
+            result = await extraction_service.extract_btrads_node(
+                request.clinical_note, 
+                request.extraction_type,
+                request.context_data
+            )
         else:
             raise HTTPException(400, f"Invalid extraction type: {request.extraction_type}")
         

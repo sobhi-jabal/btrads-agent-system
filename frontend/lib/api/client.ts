@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -135,6 +135,22 @@ export const api = {
     
     checkStatus: async () => {
       const { data } = await apiClient.get('/api/llm/status')
+      return data
+    }
+  },
+  
+  vllm: {
+    extract: async (request: {
+      clinical_note: string
+      extraction_type: 'medications' | 'radiation_date'
+      followup_date?: string
+    }) => {
+      const { data } = await apiClient.post('/api/vllm/extract', request)
+      return data
+    },
+    
+    checkStatus: async () => {
+      const { data } = await apiClient.get('/api/vllm/status')
       return data
     }
   }

@@ -7,16 +7,58 @@ redis==5.0.1
 asyncpg==0.29.0
 sqlalchemy==2.0.23
 alembic==1.12.1
+
+# LLM and Agent Orchestration
+langgraph==0.1.0
 langchain==0.2.0
 langchain-community==0.2.0
 ollama==0.1.7
+vllm>=0.4.0  # or vllm-cpu for CPU-only systems
+openai==1.0.0  # For vLLM OpenAI-compatible API
+aiohttp==3.9.0
+
+# Advanced RAG
+sentence-transformers==2.5.1
+faiss-cpu==1.7.4
+colbert-ai==0.2.0  # ColBERT for token-level retrieval
+rank-bm25==0.2.2  # BM25 for hybrid search
+nltk==3.8.1
+spacy==3.7.0
+scispacy==0.5.4  # Medical NLP
+
+# Data Processing
 numpy==1.24.3
 pandas==2.0.3
-sentence-transformers==2.5.1
+duckdb==0.10.0  # For structured queries
+pyarrow==15.0.0
+
+# Monitoring and Observability
+opentelemetry-api==1.22.0
+opentelemetry-sdk==1.22.0
+opentelemetry-instrumentation-fastapi==0.43b0
+prometheus-client==0.19.0
+structlog==24.1.0
+
+# Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
+
+# Testing
 pytest==7.4.3
 pytest-asyncio==0.21.1
-nltk==3.8.1
+pytest-cov==4.1.0
+locust==2.20.0  # Load testing
+
+# Database
 psycopg2-binary==2.9.9
+asyncpg==0.29.0
+
+# Caching and Performance
+diskcache==5.6.3
+aiocache==0.12.2
+py-breaker==0.9.0  # Circuit breaker
+
+# Medical Domain
+pymedtermino==0.3.3  # Medical terminology
+bioc==2.0  # BioC format support
