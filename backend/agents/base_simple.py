@@ -51,23 +51,23 @@ class SimpleBaseAgent(ABC):
         
         return chunks
     
-    def _extract_relevant_context(self, clinical_note: str, query_keywords: List[str], max_context: int = 65000) -> str:
-        """Return full clinical note (no RAG chunking) - matches old btrads_main_old.py in full mode"""
-        # Simply return the full text up to max_context
-        # This matches the old implementation's --mode full behavior
+    def _extract_relevant_context(self, clinical_note: str, query_keywords: List[str], max_context: int = 8000) -> str:
+        """Return truncated clinical note for llama3.2's context window"""
+        # Truncate to a reasonable size for llama3.2
+        # Focus on the most recent/relevant parts
         return clinical_note[:max_context] if len(clinical_note) > max_context else clinical_note
     
     async def _call_llm(self, prompt: str, output_format: str = "json") -> Dict[str, Any]:
         """Call Ollama LLM with the prompt"""
         logger.info(f"[DEBUG] _call_llm called with prompt length: {len(prompt)}")
         try:
-            # Configure Ollama options with larger context for clinical notes
+            # Configure Ollama options for llama3.2
             options = Options(
                 temperature=0.1,
                 top_k=40,
                 top_p=0.95,
-                num_ctx=16000,  # Larger context for phi4:14b like in old implementation
-                num_predict=512,  # Standard output length
+                num_ctx=8192,  # Reasonable context for llama3.2
+                num_predict=512,  # Enough for JSON output
                 repeat_penalty=1.1,
                 seed=42
             )
@@ -87,8 +87,8 @@ class SimpleBaseAgent(ABC):
                     from ollama import AsyncClient
                     client = AsyncClient()
                     
-                    # Call with timeout
-                    timeout_seconds = 30  # Reasonable timeout for llama3.2
+                    # Call with timeout - reasonable for llama3.2
+                    timeout_seconds = 60  # 1 minute timeout for llama3.2
                     
                     try:
                         response = await asyncio.wait_for(

@@ -29,6 +29,19 @@ class RadiationTimelineAgent(SimpleBaseAgent):
             # Extract radiation information
             extracted_data = await self._call_llm(prompt)
             
+            # Check if LLM call failed
+            if extracted_data.get("error", False):
+                # Set appropriate default values when LLM fails
+                extracted_data = {
+                    "radiation_date_str": None,
+                    "radiation_type": None,
+                    "radiation_location": None,
+                    "evidence_sentences": [],
+                    "confidence": 0.0,
+                    "reasoning": "LLM extraction failed"
+                }
+                logger.warning(f"LLM extraction failed, using defaults: {extracted_data.get('message', 'Unknown error')}")
+            
             # Parse radiation date if found
             radiation_date = None
             if extracted_data.get("radiation_date_str"):

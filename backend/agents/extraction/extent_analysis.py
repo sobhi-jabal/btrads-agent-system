@@ -57,6 +57,20 @@ class ExtentAnalysisAgent(SimpleBaseAgent):
             # Get LLM response
             response = await self._call_llm(prompt, output_format="json")
             
+            # Check if LLM call failed
+            if response.get("error", False):
+                # Set appropriate default values when LLM fails
+                response = {
+                    "is_localized": True,  # Conservative default
+                    "has_distant_sites": False,
+                    "locations": [],
+                    "extent_description": "unknown",
+                    "evidence_sentences": [],
+                    "confidence": 0.5,
+                    "reasoning": "LLM extraction failed"
+                }
+                logger.warning(f"LLM extraction failed, using defaults: {response.get('message', 'Unknown error')}")
+            
             # Determine extent category
             is_localized = response.get("is_localized", True)
             has_distant_sites = response.get("has_distant_sites", False)

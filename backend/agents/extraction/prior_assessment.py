@@ -56,8 +56,14 @@ class PriorAssessmentAgent(SimpleBaseAgent):
             # Get LLM response with JSON format
             response = await self._call_llm(prompt, output_format="json")
             
-            # Extract the value
-            has_prior = response.get("has_prior", False)
+            # Check if LLM call failed
+            if response.get("error", False):
+                # Default to no prior when LLM fails
+                has_prior = False
+                logger.warning(f"LLM extraction failed, defaulting to no prior: {response.get('message', 'Unknown error')}")
+            else:
+                # Extract the value
+                has_prior = response.get("has_prior", False)
             
             # Find source highlights
             source_highlights = await self._highlight_sources(

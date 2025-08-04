@@ -59,6 +59,19 @@ class ComponentAnalysisAgent(SimpleBaseAgent):
             # Get LLM response
             response = await self._call_llm(prompt, output_format="json")
             
+            # Check if LLM call failed
+            if response.get("error", False):
+                # Set appropriate default values when LLM fails
+                response = {
+                    "component_description": "unknown",
+                    "flair_description": "unknown",
+                    "enhancement_description": "unknown",
+                    "evidence_sentences": [],
+                    "confidence": 0.5,
+                    "reasoning": "LLM extraction failed"
+                }
+                logger.warning(f"LLM extraction failed, using defaults: {response.get('message', 'Unknown error')}")
+            
             # Determine component behavior
             flair_increased = flair_change > 0
             enhancement_increased = enhancement_change > 0

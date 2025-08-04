@@ -77,8 +77,14 @@ class ImagingComparisonAgent(SimpleBaseAgent):
             # Get LLM response
             response = await self._call_llm(prompt, output_format="json")
             
-            # Extract the assessment
-            assessment = response.get("assessment", "unknown")
+            # Check if LLM call failed
+            if response.get("error", False):
+                # Set appropriate default value when LLM fails
+                assessment = "unknown"
+                logger.warning(f"LLM extraction failed, using default: {response.get('message', 'Unknown error')}")
+            else:
+                # Extract the assessment
+                assessment = response.get("assessment", "unknown")
             
             # Validate against volume data
             if assessment != "unknown" and flair_change_pct is not None and enhancement_change_pct is not None:
