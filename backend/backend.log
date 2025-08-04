@@ -68,3 +68,13 @@ INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
 INFO:agents.base_simple:[DEBUG] Ollama returned response
 INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 13719
 INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.orchestration.langgraph_orchestrator:[Orchestrator] Graph completed for 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for prior-assessment - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for imaging-comparison - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for radiation-timeline - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for component-analysis - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for extent-analysis - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for progression-pattern - patient 1_fa654762
+INFO:     127.0.0.1:63544 - "GET /api/agents/results/1_fa654762 HTTP/1.1" 200 OK

@@ -252,7 +252,7 @@ export function BTRADSDecisionFlow({
           
           if (result) {
             // Update UI with real results
-            displayBackendResults(result)
+            await displayBackendResults(result)
             setIsProcessing(false)
             return
           }
@@ -276,8 +276,116 @@ export function BTRADSDecisionFlow({
     setIsProcessing(false)
   }
   
-  const displayBackendResults = (result: any) => {
+  const displayBackendResults = async (result: any) => {
     console.log('[BTRADSFlow] Displaying backend results:', result)
+    
+    // Fetch agent results to populate the decision nodes
+    try {
+      const agentResults = await api.agents.getResults(patientId)
+      console.log('[BTRADSFlow] Fetched agent results:', agentResults)
+      
+      // Update processing steps with agent results
+      if (agentResults?.results) {
+        setProcessingSteps(prev => prev.map(step => {
+          // Find matching agent result for this step
+          const agentResult = agentResults.results.find((r: any) => {
+            // Match by node_id or agent_id
+            return r.node_id === step.nodeId || 
+                   r.agent_id === step.nodeId ||
+                   // Special mappings for known nodes
+                   (step.nodeId === 'node_1_suitable_prior' && r.node_id === 'node_1_suitable_prior') ||
+                   (step.nodeId === 'node_2_imaging_assessment' && r.node_id === 'node_2_imaging_assessment') ||
+                   (step.nodeId === 'node_3a_medication_effects' && r.agent_id === 'medication-status') ||
+                   (step.nodeId === 'node_4_time_since_xrt' && r.agent_id === 'radiation-timeline') ||
+                   (step.nodeId === 'node_5_what_is_worse' && r.agent_id === 'component-analysis') ||
+                   (step.nodeId === 'node_6_how_much_worse' && r.agent_id === 'extent-analysis') ||
+                   (step.nodeId === 'node_7_progressive' && r.agent_id === 'progression-pattern')
+          })
+          
+          if (agentResult) {
+            console.log(`[BTRADSFlow] Found agent result for ${step.nodeId}:`, agentResult)
+            
+            // Transform evidence from agent result
+            const evidence = agentResult.source_highlights ? 
+              transformEvidence(agentResult.source_highlights, patientData?.clinical_note) : []
+            
+            // Transform the extracted value based on the step type
+            let transformedData = agentResult.extracted_value
+            
+            // Transform based on node type
+            if (step.nodeId === 'node_1_suitable_prior') {
+              const hasPrior = agentResult.extracted_value?.has_suitable_prior || false
+              transformedData = {
+                assessment: hasPrior ? 'Has Prior' : 'No Prior',
+                hasPrior: hasPrior,
+                ...agentResult.extracted_value
+              }
+            } else if (step.nodeId === 'node_2_imaging_assessment') {
+              const assessment = agentResult.extracted_value || 'unknown'
+              transformedData = {
+                assessment: typeof assessment === 'string' ? assessment : (assessment.overall_assessment || 'unknown'),
+                flairChange: patientData?.flair_change_percentage || 0,
+                enhChange: patientData?.enhancement_change_percentage || 0,
+                flairVolume: `${patientData?.baseline_flair_volume || 0} → ${patientData?.followup_flair_volume || 0} mL`,
+                enhVolume: `${patientData?.baseline_enhancement_volume || 0} → ${patientData?.followup_enhancement_volume || 0} mL`,
+                ...agentResult.extracted_value
+              }
+            } else if (step.nodeId === 'node_3a_medication_effects') {
+              transformedData = {
+                medicationPath: 'On Medications',
+                extractedMedications: agentResult.extracted_value,
+                ...agentResult.extracted_value
+              }
+            } else if (step.nodeId === 'node_4_time_since_xrt') {
+              const days = agentResult.extracted_value?.time_since_radiation_days
+              transformedData = {
+                timeCategory: days && days < 90 ? 'Recent (<90 days)' : 'Remote (≥90 days)',
+                extractedRadiationDate: agentResult.extracted_value,
+                ...agentResult.extracted_value
+              }
+            } else if (step.nodeId === 'node_5_what_is_worse') {
+              const pattern = agentResult.extracted_value?.pattern || agentResult.extracted_value?.dominant_component || 'unknown'
+              transformedData = {
+                assessment: pattern,
+                pattern: pattern,
+                ...agentResult.extracted_value
+              }
+            } else if (step.nodeId === 'node_6_how_much_worse') {
+              const extent = agentResult.extracted_value?.extent || agentResult.extracted_value?.extent_category || 'unknown'
+              transformedData = {
+                assessment: extent === 'limited' ? 'Limited (<40%)' : 'Extensive (≥40%)',
+                extent: extent,
+                ...agentResult.extracted_value
+              }
+            } else if (step.nodeId === 'node_7_progressive') {
+              const pattern = agentResult.extracted_value?.pattern || agentResult.extracted_value?.pattern_type || 'unknown'
+              transformedData = {
+                assessment: pattern === 'progressive' ? 'Progressive' : 'Stable Pattern',
+                pattern: pattern,
+                ...agentResult.extracted_value
+              }
+            }
+            
+            return {
+              ...step,
+              status: 'completed',
+              data: transformedData,
+              reasoning: agentResult.reasoning || 'Assessment completed',
+              evidence: evidence,
+              confidence: {
+                score: agentResult.confidence,
+                source: 'llm',
+                factors: []
+              }
+            }
+          }
+          
+          return { ...step, status: 'completed' }
+        }))
+      }
+    } catch (error) {
+      console.error('[BTRADSFlow] Error fetching agent results:', error)
+    }
     
     // Update final result
     setFinalResult({
@@ -285,9 +393,6 @@ export function BTRADSDecisionFlow({
       reasoning: result.reasoning || 'No reasoning provided',
       confidence: result.confidence_score || 0
     })
-    
-    // Mark all steps as completed
-    setProcessingSteps(prev => prev.map(step => ({ ...step, status: 'completed' })))
     
     // Show the algorithm path if available
     if (result.algorithm_path?.nodes_visited) {

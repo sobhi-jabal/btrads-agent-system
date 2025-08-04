@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -89,7 +89,7 @@ export const api = {
     
     getResults: async (patientId: string, params?: any) => {
       const { data } = await apiClient.get(`/api/agents/results/${patientId}`, { params })
-      return data.results
+      return data
     },
     
     test: async (agentId: string, testData: any) => {
