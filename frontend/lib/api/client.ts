@@ -21,7 +21,7 @@ apiClient.interceptors.request.use((config) => {
 export const api = {
   patients: {
     list: async (params?: any) => {
-      const { data } = await apiClient.get('/api/patients', { params })
+      const { data } = await apiClient.get('/api/patients/', { params })
       return data
     },
     
@@ -43,9 +43,17 @@ export const api = {
     upload: async (file: File) => {
       const formData = new FormData()
       formData.append('file', file)
-      const { data } = await apiClient.post('/api/patients/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      
+      // Use axios directly to avoid header conflicts
+      const { data } = await axios.post(
+        `${API_BASE_URL}/api/patients/upload`,
+        formData,
+        {
+          headers: {
+            // Let browser set Content-Type with boundary automatically
+          }
+        }
+      );
       return data
     },
     
@@ -59,6 +67,17 @@ export const api = {
     getStatus: async (id: string) => {
       const { data } = await apiClient.get(`/api/patients/${id}/status`)
       return data
+    },
+    
+    getResult: async (id: string) => {
+      const { data } = await apiClient.get(`/api/patients/${id}`)
+      // Extract BT-RADS result if available
+      if (data.btrads_result) {
+        return typeof data.btrads_result === 'string' 
+          ? JSON.parse(data.btrads_result) 
+          : data.btrads_result
+      }
+      return null
     }
   },
   

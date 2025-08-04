@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, Optional, List, TypedDict, Annotated
 from datetime import datetime
 import asyncio
+import json
 
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -16,6 +17,8 @@ from models.agent import AgentResult
 from models.btrads import BTRADSPath, BTRADSResult, BTRADSScore
 from services.websocket_manager import WebSocketManager
 from config.agent_config import agent_config
+from utils.database import get_async_db, AgentResultRecord
+from services.agent_service_sqlite import agent_service
 
 logger = logging.getLogger(__name__)
 
@@ -549,7 +552,7 @@ class LangGraphOrchestrator:
         logger.info(f"[Orchestrator] Graph completed for {patient_data.patient_id}")
         
         # Create result
-        return self._create_result(final_state)
+        return await self._create_result(final_state)
     
     def _prepare_context(self, patient_data: PatientData) -> Dict[str, Any]:
         """Prepare context for agents"""
@@ -567,8 +570,13 @@ class LangGraphOrchestrator:
         
         return context
     
-    def _create_result(self, state: BTRADSState) -> BTRADSResult:
+    async def _create_result(self, state: BTRADSState) -> BTRADSResult:
         """Create final result from state"""
+        
+        # Save all agent results to database before creating final result
+        for agent_name, result in state["agent_results"].items():
+            if result:
+                await self._save_agent_result(result)
         
         # Calculate average confidence
         avg_confidence = (
@@ -614,6 +622,15 @@ class LangGraphOrchestrator:
                 if state["completed_at"] else 0
             )
         )
+    
+    async def _save_agent_result(self, result: AgentResult):
+        """Save an agent result to the database"""
+        try:
+            await agent_service.save_result(result)
+            logger.info(f"Saved agent result for {result.agent_id} - patient {result.patient_id}")
+        except Exception as e:
+            logger.error(f"Failed to save agent result: {e}")
+            # Don't fail the whole process if we can't save one result
     
     async def _notify_status(
         self,

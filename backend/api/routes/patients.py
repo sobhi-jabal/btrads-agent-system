@@ -29,15 +29,31 @@ async def upload_patients(file: UploadFile = File(...)):
         raise HTTPException(400, "File must be CSV format")
     
     try:
-        # Read CSV
+        # Read CSV - handle potential encoding and multiline issues
         contents = await file.read()
-        df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
+        
+        # Try different encodings if UTF-8 fails
+        try:
+            text_content = contents.decode('utf-8')
+        except UnicodeDecodeError:
+            try:
+                text_content = contents.decode('latin-1')
+            except:
+                text_content = contents.decode('utf-8', errors='ignore')
+        
+        # Parse CSV with proper handling of multiline fields
+        df = pd.read_csv(io.StringIO(text_content), 
+                        escapechar='\\',
+                        on_bad_lines='skip')
         
         # Process and store patients
         patients = await patient_service.process_csv(df)
         return patients
         
     except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"CSV Upload Error: {error_detail}")
         raise HTTPException(400, f"Error processing file: {str(e)}")
 
 @router.get("/", response_model=List[Patient])

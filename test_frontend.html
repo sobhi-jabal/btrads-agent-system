@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend API</title>
+</head>
+<body>
+    <h1>Test BT-RADS Frontend API</h1>
+    
+    <button onclick="testExtraction()">Test LLM Extraction</button>
+    <button onclick="uploadAndProcess()">Upload CSV and Process</button>
+    
+    <pre id="output"></pre>
+    
+    <script>
+        const log = (msg) => {
+            document.getElementById('output').textContent += msg + '\n';
+            console.log(msg);
+        };
+        
+        async function testExtraction() {
+            log('Testing LLM extraction...');
+            
+            try {
+                const response = await fetch('http://localhost:8001/api/llm/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        clinical_note: "Patient on Avastin 10mg/kg. Previous radiation completed January 2023.",
+                        extraction_type: "medications",
+                        model: "llama3.2:latest"
+                    })
+                });
+                
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('Error: ' + error);
+            }
+        }
+        
+        async function uploadAndProcess() {
+            log('Creating test CSV...');
+            
+            const csvContent = `pid,MRN,clinical_note_closest,Baseline_imaging_date,Followup_imaging_date,Baseline_flair_volume,Baseline_enhancement_volume,Followup_flair_volume,Followup_enhancement_volume,Volume_Difference_flair,Volume_Difference_flair_Percentage_Change,Volume_Difference_enhancement,Volume_Difference_enhancement_Percentage_Change,Ground_Truth_BTRADS (General Category),Ground_Truth_BTRADS (Precise Category)
+TEST1,PT-TEST1,"Patient with GBM on Avastin 10mg/kg. MRI shows increased enhancement.",2023-06-01,2023-12-01,45.2,12.3,52.1,18.7,6.9,15.3,6.4,52.0,BT-3,BT-3c`;
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const formData = new FormData();
+            formData.append('file', blob, 'test.csv');
+            
+            try {
+                // Upload CSV
+                log('Uploading CSV...');
+                const uploadResponse = await fetch('http://localhost:8001/api/patients/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const patients = await uploadResponse.json();
+                log('Upload response: ' + JSON.stringify(patients, null, 2));
+                
+                if (patients && patients.length > 0) {
+                    const patientId = patients[0].id;
+                    log(`Processing patient ${patientId}...`);
+                    
+                    // Start processing
+                    const processResponse = await fetch(`http://localhost:8001/api/patients/${patientId}/process`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const processResult = await processResponse.json();
+                    log('Process response: ' + JSON.stringify(processResult, null, 2));
+                    
+                    // Check status
+                    setTimeout(async () => {
+                        const statusResponse = await fetch(`http://localhost:8001/api/patients/${patientId}`);
+                        const status = await statusResponse.json();
+                        log('Status: ' + JSON.stringify(status, null, 2));
+                    }, 10000);
+                }
+            } catch (error) {
+                log('Error: ' + error);
+            }
+        }
+    </script>
+</body>
+</html>

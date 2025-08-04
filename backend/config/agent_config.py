@@ -136,9 +136,31 @@ class AgentConfig:
                 raise ValueError(f"Unknown agent type: {agent_type}")
         
         else:
-            # Ollama mode - use Ollama service with existing agents
-            # This would require updating the existing agents to use Ollama
-            raise NotImplementedError(f"Agent mode {self.mode} not yet implemented")
+            # Ollama mode - use mock agents for now (they work without external dependencies)
+            # In production, these would be replaced with Ollama-specific implementations
+            if agent_type == "medication_status":
+                from agents.extraction.medication_status import MedicationStatusAgent
+                return MedicationStatusAgent
+            elif agent_type == "prior_assessment":
+                from agents.extraction.prior_assessment import PriorAssessmentAgent
+                return PriorAssessmentAgent
+            elif agent_type == "imaging_comparison":
+                from agents.extraction.imaging_comparison import ImagingComparisonAgent
+                return ImagingComparisonAgent
+            elif agent_type == "radiation_timeline":
+                from agents.extraction.radiation_timeline import RadiationTimelineAgent
+                return RadiationTimelineAgent
+            elif agent_type == "component_analysis":
+                from agents.extraction.component_analysis import ComponentAnalysisAgent
+                return ComponentAnalysisAgent
+            elif agent_type == "extent_analysis":
+                from agents.extraction.extent_analysis import ExtentAnalysisAgent
+                return ExtentAnalysisAgent
+            elif agent_type == "progression_pattern":
+                from agents.extraction.progression_pattern import ProgressionPatternAgent
+                return ProgressionPatternAgent
+            else:
+                raise ValueError(f"Unknown agent type: {agent_type}")
     
     def get_agent_config(self, agent_type: str) -> Dict[str, Any]:
         """Get configuration for specific agent"""

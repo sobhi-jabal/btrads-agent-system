@@ -228,7 +228,7 @@ class OllamaExtractionService:
     def __init__(self, model: str = None):
         self.model = model or os.getenv("OLLAMA_MODEL", "phi4:14b")
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        self.timeout = int(os.getenv("OLLAMA_TIMEOUT", "120"))
+        self.timeout = int(os.getenv("OLLAMA_TIMEOUT", "300"))
         self._ensure_model_available()
     
     def _ensure_model_available(self):
@@ -319,10 +319,12 @@ class OllamaExtractionService:
             
         except Exception as e:
             logger.error(f"Error extracting medications: {e}")
+            processing_time = (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else 0.0
             return {
                 "data": {"steroid_status": "unknown", "avastin_status": "unknown"},
                 "evidence": [],
                 "confidence": 0.0,
+                "processing_time": processing_time,
                 "error": str(e),
                 "method": "llm",
                 "model": self.model
@@ -388,10 +390,12 @@ class OllamaExtractionService:
             
         except Exception as e:
             logger.error(f"Error extracting radiation date: {e}")
+            processing_time = (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else 0.0
             return {
                 "data": {"radiation_date": "unknown"},
                 "evidence": [],
                 "confidence": 0.0,
+                "processing_time": processing_time,
                 "error": str(e),
                 "method": "llm",
                 "model": self.model
@@ -456,10 +460,12 @@ class OllamaExtractionService:
             
         except Exception as e:
             logger.error(f"Error extracting BT-RADS node {node_name}: {e}")
+            processing_time = (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else 0.0
             return {
                 "data": {"error": str(e)},
                 "evidence": [],
                 "confidence": 0.0,
+                "processing_time": processing_time,
                 "error": str(e),
                 "method": "llm",
                 "model": self.model,
@@ -487,10 +493,11 @@ class OllamaExtractionService:
             "temperature": 0.1,  # Low temperature for consistency
             "top_k": 40,
             "top_p": 0.95,
-            "num_ctx": 2048,  # Further reduced for faster processing
-            "num_predict": 200,  # Reduced for extraction tasks
+            "num_ctx": 16000,  # Larger context for phi4:14b like in old implementation
+            "num_predict": 512,  # Standard output length
             "repeat_penalty": 1.1,
             "seed": 42,
+            "num_thread": 8,  # Use more threads for faster processing
         }
         
         try:

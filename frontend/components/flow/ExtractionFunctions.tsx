@@ -344,54 +344,29 @@ export const extractDataPointsNLP = (text: string) => {
 
 // LLM extraction using Ollama with phi4
 export const extractDataPointsLLM = async (text: string, followupDate?: string) => {
-  try {
-    const [medicationsResponse, radiationResponse] = await Promise.all([
-      api.llm.extract({
-        clinical_note: text,
-        extraction_type: 'medications',
-        model: 'phi4:14b'
-      }),
-      api.llm.extract({
-        clinical_note: text,
-        extraction_type: 'radiation_date',
-        model: 'phi4:14b'
-      })
-    ])
-    
-    // Check for low confidence or missing data in LLM results
-    const medConfidence = medicationsResponse.confidence || 0
-    const radConfidence = radiationResponse.confidence || 0
-    
-    return {
-      medications: {
-        ...medicationsResponse,
-        isMissing: false  // LLM extraction succeeded, even if values are "unknown"
-      },
-      radiationDate: {
-        ...radiationResponse,
-        isMissing: false  // LLM extraction succeeded, even if values are "unknown"
-      }
-    }
-  } catch (error) {
-    console.error('LLM extraction failed:', error)
-    // Return error state with isMissing = true
-    return {
-      medications: {
-        data: null,
-        error: error.message || 'LLM extraction failed',
-        confidence: 0,
-        processing_time: 0,
-        isMissing: true,  // Mark as missing when extraction actually fails
-        evidence: []
-      },
-      radiationDate: {
-        data: null,
-        error: error.message || 'LLM extraction failed',
-        confidence: 0,
-        processing_time: 0,
-        isMissing: true,  // Mark as missing when extraction actually fails
-        evidence: []
-      }
+  console.log('[LLM] Starting extraction...')
+  
+  const [medicationsResponse, radiationResponse] = await Promise.all([
+    api.llm.extract({
+      clinical_note: text,
+      extraction_type: 'medications',
+      model: 'llama3.2:latest'
+    }),
+    api.llm.extract({
+      clinical_note: text,
+      extraction_type: 'radiation_date',
+      model: 'llama3.2:latest'
+    })
+  ])
+  
+  return {
+    medications: {
+      ...medicationsResponse,
+      isMissing: false
+    },
+    radiationDate: {
+      ...radiationResponse,
+      isMissing: false
     }
   }
 }

@@ -38,6 +38,13 @@ export interface MissingInfoItem {
     pattern?: string
     required?: boolean
   }
+  // Extended properties for BT-RADS flow
+  node?: string
+  issue?: string
+  impact?: string
+  clinicalImpact?: string
+  fallback?: string
+  recommendation?: string
 }
 
 export interface UserProvidedData {

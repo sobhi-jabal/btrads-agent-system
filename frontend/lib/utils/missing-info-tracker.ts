@@ -4,26 +4,10 @@ export class MissingInfoCollector {
   private items: MissingInfoItem[] = []
   private idCounter = 0
 
-  addMissingInfo({
-    node,
-    field,
-    issue,
-    impact,
-    clinicalImpact,
-    fallback,
-    confidence,
-    recommendation
-  }: Omit<MissingInfoItem, 'id'>) {
+  addMissingInfo(item: Omit<MissingInfoItem, 'id'>) {
     this.items.push({
-      id: `missing-${this.idCounter++}`,
-      node,
-      field,
-      issue,
-      impact,
-      clinicalImpact,
-      fallback,
-      confidence,
-      recommendation
+      ...item,
+      id: `missing-${this.idCounter++}`
     })
   }
 

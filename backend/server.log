@@ -3765,3 +3765,80 @@ INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransform
 INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
 INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
 INFO:     Application startup complete.
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'utils/database.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:main:Shutting down...
+INFO:     Application shutdown complete.
+INFO:     Finished server process [94998]
+Python(3481) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:3 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'utils/database.py'. Reloading...
+Python(3680) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:3 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
+Python(3780) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:3 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'services/patient_service_sqlite.py'. Reloading...
+Python(3865) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/patient_service_sqlite.py'. Reloading...
+Python(3876) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:1 change detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
+Python(3898) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/multiprocessing/spawn.py", line 120, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/multiprocessing/spawn.py", line 129, in _main
+    prepare(preparation_data)
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/multiprocessing/spawn.py", line 240, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/multiprocessing/spawn.py", line 291, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 291, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/sobhi/Desktop/Claude_Code/Duke/Evan/BTRADS_Agents/btrads-agent-system/backend/main.py", line 14, in <module>
+    from services.patient_service_sqlite import PatientService
+  File "/Users/sobhi/Desktop/Claude_Code/Duke/Evan/BTRADS_Agents/btrads-agent-system/backend/services/patient_service_sqlite.py", line 7, in <module>
+    from models.patient import Patient, PatientData, ProcessingStatus
+ImportError: cannot import name 'ProcessingStatus' from 'models.patient' (/Users/sobhi/Desktop/Claude_Code/Duke/Evan/BTRADS_Agents/btrads-agent-system/backend/models/patient.py)
+INFO:watchfiles.main:6 changes detected
+INFO:watchfiles.main:3 changes detected
+WARNING:  WatchFiles detected changes in 'models/patient.py'. Reloading...
+Python(4172) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+INFO:watchfiles.main:5 changes detected
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 8 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

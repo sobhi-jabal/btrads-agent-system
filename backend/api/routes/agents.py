@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional, Dict, Any
 
 from models.agent import AgentResult
-from services.agent_service import AgentService
+from services.agent_service_sqlite import AgentService
 
 router = APIRouter()
 agent_service = AgentService()

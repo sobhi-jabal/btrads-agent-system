@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CSV Upload E2E</title>
+</head>
+<body>
+    <h1>Testing CSV Upload Flow</h1>
+    
+    <h2>Step 1: Create test CSV</h2>
+    <button id="createCsv">Create Test CSV</button>
+    <pre id="csvContent"></pre>
+    
+    <h2>Step 2: Upload to backend</h2>
+    <input type="file" id="fileInput" accept=".csv">
+    <button id="uploadBtn">Upload to Backend</button>
+    <pre id="result"></pre>
+    
+    <script>
+        // Create test CSV
+        document.getElementById('createCsv').onclick = () => {
+            const csv = `patient_id,clinical_note
+TEST001,"MRI Brain: Glioblastoma patient on Avastin"
+TEST002,"Brain tumor post-radiation therapy"`;
+            
+            document.getElementById('csvContent').textContent = csv;
+            
+            // Create blob and download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'test_patients.csv';
+            a.click();
+        };
+        
+        // Upload to backend
+        document.getElementById('uploadBtn').onclick = async () => {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files[0]) {
+                alert('Please select a file first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('http://localhost:8001/api/patients/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        };
+    </script>
+</body>
+</html>

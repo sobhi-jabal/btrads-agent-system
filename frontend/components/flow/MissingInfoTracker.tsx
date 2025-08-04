@@ -175,7 +175,7 @@ const MissingInfoItem: React.FC<{
           {getIcon()}
           <div className="flex-1">
             <div className="font-medium text-sm">
-              NODE: {item.node.toUpperCase()}
+              NODE: {item.node?.toUpperCase() || 'UNKNOWN'}
             </div>
             <div className="text-sm text-gray-700 mt-0.5">
               {item.issue}
