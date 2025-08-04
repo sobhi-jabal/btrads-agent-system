@@ -21,14 +21,22 @@ class PriorAssessmentAgent(SimpleBaseAgent):
     
     async def extract(self, clinical_note: str, context: Dict[str, Any], patient_id: str) -> AgentResult:
         """Extract prior imaging availability from clinical note"""
+        logger.info(f"[DEBUG] PriorAssessmentAgent.extract called for patient {patient_id}")
         start_time = time.time()
         try:
+            # Use full clinical note (no RAG chunking)
+            prior_keywords = [
+                'prior', 'baseline', 'previous', 'comparison', 'MRI', 
+                'scan', 'imaging', 'study', 'post-operative', 'follow-up'
+            ]
+            relevant_context = self._extract_relevant_context(clinical_note, prior_keywords)
+            
             # Create prompt for prior assessment
             prompt = f"""
             Analyze this clinical note to determine if there is suitable prior imaging for BT-RADS comparison.
             
             Clinical Note:
-            {clinical_note}
+            {relevant_context}
             
             Look for:
             - References to prior MRI scans
@@ -45,8 +53,8 @@ class PriorAssessmentAgent(SimpleBaseAgent):
             }}
             """
             
-            # Get LLM response
-            response = await self._call_llm(prompt)
+            # Get LLM response with JSON format
+            response = await self._call_llm(prompt, output_format="json")
             
             # Extract the value
             has_prior = response.get("has_prior", False)
@@ -64,12 +72,12 @@ class PriorAssessmentAgent(SimpleBaseAgent):
                 patient_id=patient_id,
                 node_id="node_1_suitable_prior",
                 timestamp=datetime.utcnow(),
-                extracted_value="yes" if has_prior else "no",
+                extracted_value={"has_suitable_prior": has_prior},
                 confidence=response.get("confidence", 0.7),
                 reasoning=response.get("reasoning", ""),
                 source_highlights=source_highlights,
                 processing_time_ms=processing_time,
-                llm_model="mock-llm"
+                llm_model="phi4:14b"
             )
             
         except Exception as e:

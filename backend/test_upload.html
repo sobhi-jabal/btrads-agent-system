@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CSV Upload</title>
+</head>
+<body>
+    <h1>Test CSV Upload</h1>
+    <input type="file" id="fileInput" accept=".csv">
+    <button onclick="uploadFile()">Upload</button>
+    <div id="result"></div>
+    
+    <script>
+    async function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Please select a file');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch('http://localhost:8001/api/patients/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            document.getElementById('result').innerHTML = `
+                <h3>Success!</h3>
+                <p>Uploaded ${data.length} patients</p>
+                <pre>${JSON.stringify(data[0], null, 2)}</pre>
+            `;
+        } catch (error) {
+            document.getElementById('result').innerHTML = `
+                <h3>Error</h3>
+                <p>${error.message}</p>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>

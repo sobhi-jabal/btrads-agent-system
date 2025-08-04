@@ -52,23 +52,29 @@ export default function Home() {
   const [allPatients, setAllPatients] = useState<any[]>([]);
   
   // Extraction settings
-  const [extractionMode, setExtractionMode] = useState<'nlp' | 'llm' | 'both'>('nlp');
+  const [extractionMode, setExtractionMode] = useState<'nlp' | 'llm' | 'both'>('llm');
 
-  // Debug logging
+  // Initialize - Don't load old patients on startup
   useEffect(() => {
-    console.log("Home component mounted");
-    fetchAllPatients();
+    // Comment out to prevent loading old patients
+    // fetchAllPatients();
+    
+    // Start with clean state
+    setAllPatients([]);
+    setUploadedPatients([]);
   }, []);
   
-  // Fetch all patients
+  // Fetch all patients - DISABLED to prevent loading old patients
   const fetchAllPatients = async () => {
-    try {
-      const patients = await api.patients.list();
-      setAllPatients(patients);
-      setUploadedPatients(patients);
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-    }
+    // DISABLED - We don't want to load patients from database
+    // try {
+    //   const patients = await api.patients.list();
+    //   setAllPatients(patients);
+    //   setUploadedPatients(patients);
+    // } catch (error) {
+    //   console.error("Error fetching patients:", error);
+    // }
+    console.log("fetchAllPatients called but disabled to prevent loading old patients");
   };
 
   const toggleSection = (section: string) => {
@@ -107,8 +113,12 @@ export default function Home() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log('[Upload] File selected:', file.name);
     setError(null);
     setSuccess(null);
+    
+    // Auto-expand CSV upload section when file is selected
+    setExpandedSection("csv-upload");
     
     try {
       const text = await file.text();
@@ -194,47 +204,117 @@ export default function Home() {
       };
       
       const data = parseCSV(text);
+      console.log('[Upload] CSV parsed, rows:', data.length);
 
       setCsvData(data);
       setShowValidator(true);
     } catch (error) {
-      console.error("Error reading file:", error);
+      console.error("[Upload] Error reading file:", error);
       setError("Failed to read CSV file. Please check the format.");
     }
   };
 
   const handleValidationComplete = async (result: any) => {
+    console.log('[Upload] handleValidationComplete called with:', result);
     if (result.isValid) {
+      console.log('[Upload] Validation is valid, starting upload...');
       setIsProcessing(true);
       setError(null);
       try {
-        // Convert CSV data back to CSV string
-        const headers = Object.keys(csvData[0]);
+        // Check if we have data to process
+        if (!csvData || csvData.length === 0) {
+          setError('No CSV data available to upload. Please select a file again.');
+          return;
+        }
+        
+        // Create normalized data with standardized column names
+        const normalizedData = csvData.map((row) => {
+          const normalizedRow: any = {};
+          
+          // Map columns based on validation result mappings
+          result.mappings.forEach((mapping: any) => {
+            if (mapping.status === 'valid' && mapping.csvColumn) {
+              normalizedRow[mapping.btradsField] = row[mapping.csvColumn] || '';
+            }
+          });
+          
+          return normalizedRow;
+        });
+        
+        // Check if normalization produced data
+        if (normalizedData.length === 0) {
+          setError('Failed to process CSV data. Please check the file format.');
+          return;
+        }
+        
+        // Get headers from valid mappings
+        const headers = result.mappings
+          .filter((m: any) => m.status === 'valid')
+          .map((m: any) => m.btradsField);
+        
+        if (headers.length === 0) {
+          setError('No valid column mappings found. Please check the CSV format.');
+          return;
+        }
+        
+        // Create CSV with normalized column names
+        const csvRows = normalizedData.map((row: any) => 
+          headers.map((header: string) => {
+            const value = row[header] || '';
+            // Escape quotes and wrap in quotes if contains comma or newline
+            const escaped = value.toString().replace(/"/g, '""');
+            return /[,\n\r"]/.test(escaped) ? `"${escaped}"` : escaped;
+          }).join(',')
+        );
+        
         const csvContent = [
           headers.join(','),
-          ...csvData.map(row => 
-            headers.map(header => {
-              const value = row[header] || '';
-              // Escape quotes and wrap in quotes if contains comma or newline
-              const escaped = value.toString().replace(/"/g, '""');
-              return /[,\n\r"]/.test(escaped) ? `"${escaped}"` : escaped;
-            }).join(',')
-          )
+          ...csvRows
         ].join('\n');
 
         // Create a Blob and File from the CSV content
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const file = new File([blob], 'validated_data.csv', { type: 'text/csv' });
 
+        console.log('[Upload] Uploading file to backend...');
         const patients = await api.patients.upload(file);
+        console.log('[Upload] Upload successful, received patients:', patients);
+        
+        // Update state
         setUploadedPatients(patients);
+        setAllPatients(prev => [...prev, ...patients]);
         setSuccess(`Successfully uploaded ${patients.length} patients from CSV file.`);
         setShowValidator(false);
         setCsvData([]);
-        setExpandedSection("csv-upload"); // Keep CSV section expanded to show uploaded patients
+        
+        // Keep CSV section expanded to show the uploaded patients
+        setExpandedSection("csv-upload");
+        
+        // Clear file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        
+        // Refresh the patient list
+        await fetchAllPatients();
+        
+        console.log('[Upload] Upload complete, UI updated');
       } catch (error: any) {
-        console.error("Error uploading file:", error);
-        setError(error.response?.data?.detail || "Failed to upload CSV file to server. Please check if the backend is running.");
+        console.error("[Upload] Error uploading file:", error);
+        
+        // Extract error message from backend response
+        const errorDetail = error.response?.data?.detail;
+        let errorMessage = "Failed to upload CSV file. Please check the format and try again.";
+        
+        if (errorDetail) {
+          if (Array.isArray(errorDetail)) {
+            errorMessage = errorDetail.map(err => err.msg || err.message || JSON.stringify(err)).join(", ");
+          } else if (typeof errorDetail === 'string') {
+            errorMessage = errorDetail;
+          }
+        }
+        
+        setError(errorMessage);
       } finally {
         setIsProcessing(false);
         if (fileInputRef.current) {
@@ -546,6 +626,17 @@ export default function Home() {
             </div>
           )}
 
+          {/* Hidden file input - always in DOM */}
+          <input
+            ref={fileInputRef}
+            id="csv-file"
+            type="file"
+            accept=".csv"
+            onChange={handleFileUpload}
+            className="hidden"
+            style={{ display: 'none' }}
+          />
+          
           {/* CSV Upload Section */}
           <Card className={`shadow-soft transition-all duration-300 ${
             expandedSection === "csv-upload" ? "shadow-soft-lg" : ""
@@ -562,15 +653,22 @@ export default function Home() {
                   <div>
                     <CardTitle className="text-lg">Batch Processing</CardTitle>
                     <CardDescription>
-                      Upload CSV with multiple patients
+                      Upload CSV with multiple patients - Click to expand
                     </CardDescription>
                   </div>
                 </div>
-                {expandedSection === "csv-upload" ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                )}
+                <div className="flex items-center gap-2">
+                  {showValidator && (
+                    <Badge variant="outline" className="animate-pulse">
+                      Validating CSV...
+                    </Badge>
+                  )}
+                  {expandedSection === "csv-upload" ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </div>
               </div>
             </CardHeader>
             
@@ -588,14 +686,6 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground mb-4">
                           CSV should contain patient data with clinical notes
                         </p>
-                        <input
-                          ref={fileInputRef}
-                          id="csv-file"
-                          type="file"
-                          accept=".csv"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                        />
                         <Button 
                           onClick={() => fileInputRef.current?.click()}
                           disabled={isProcessing}

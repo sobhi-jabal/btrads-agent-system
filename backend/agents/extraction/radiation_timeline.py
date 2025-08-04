@@ -77,7 +77,7 @@ class RadiationTimelineAgent(SimpleBaseAgent):
                 reasoning=extracted_data.get("reasoning", ""),
                 source_highlights=source_highlights,
                 processing_time_ms=processing_time,
-                llm_model="mock-llm"
+                llm_model="phi4:14b"
             )
             
         except Exception as e:

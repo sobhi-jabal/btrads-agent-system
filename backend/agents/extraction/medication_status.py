@@ -23,15 +23,23 @@ class MedicationStatusAgent(SimpleBaseAgent):
         """Extract medication status from clinical note"""
         start_time = time.time()
         try:
-            # Create prompt for medication extraction
+            # Use full clinical note (no RAG chunking)
+            medication_keywords = [
+                'steroid', 'dexamethasone', 'decadron', 'prednisone', 'prednisolone',
+                'avastin', 'bevacizumab', 'anti-angiogenic', 'medication', 'drug',
+                'dose', 'mg', 'taper', 'increase', 'decrease', 'started', 'discontinued'
+            ]
+            relevant_context = self._extract_relevant_context(clinical_note, medication_keywords)
+            
+            # Create prompt for medication extraction with chunked context
             prompt = f"""
             You are an expert medical data extractor specializing in brain tumor patient medication management.
             Your task is to extract CURRENT medication status with high precision.
             
             Clinical Note:
-            {clinical_note}
+            {relevant_context}
             
-            Extract CURRENT medication status from the clinical note.
+            Extract CURRENT medication status from the clinical note context.
             
             STEROID STATUS - Look for dexamethasone, decadron, prednisolone, prednisone:
             - 'none': Patient is not currently on steroids
@@ -60,8 +68,8 @@ class MedicationStatusAgent(SimpleBaseAgent):
             }}
             """
             
-            # Get LLM response
-            response = await self._call_llm(prompt)
+            # Get LLM response with JSON format
+            response = await self._call_llm(prompt, output_format="json")
             
             # Extract the medication status
             medication_status = {
@@ -91,7 +99,7 @@ class MedicationStatusAgent(SimpleBaseAgent):
                 reasoning=response.get("reasoning", f"Steroid status: {medication_status['steroid_status']}, Avastin status: {medication_status['avastin_status']}"),
                 source_highlights=source_highlights,
                 processing_time_ms=processing_time,
-                llm_model="mock-llm"
+                llm_model="phi4:14b"
             )
             
         except Exception as e:

@@ -57,7 +57,7 @@ class ComponentAnalysisAgent(SimpleBaseAgent):
             """
             
             # Get LLM response
-            response = await self._call_llm(prompt)
+            response = await self._call_llm(prompt, output_format="json")
             
             # Determine component behavior
             flair_increased = flair_change > 0
@@ -97,7 +97,7 @@ class ComponentAnalysisAgent(SimpleBaseAgent):
                 reasoning=response.get("reasoning", ""),
                 source_highlights=source_highlights,
                 processing_time_ms=processing_time,
-                llm_model="mock-llm"
+                llm_model="phi4:14b"
             )
             
         except Exception as e:

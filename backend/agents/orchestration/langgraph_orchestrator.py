@@ -205,6 +205,7 @@ class LangGraphOrchestrator:
     # Node implementations
     async def _start_node(self, state: BTRADSState) -> BTRADSState:
         """Initialize processing"""
+        logger.info(f"[DEBUG] Entering _start_node for patient {state.get('patient_id')}")
         state["current_node"] = "start"
         state["path"].append("start")
         
@@ -214,15 +215,18 @@ class LangGraphOrchestrator:
             "mode": state["validation_mode"]
         })
         
+        logger.info(f"[DEBUG] Exiting _start_node for patient {state.get('patient_id')}")
         return state
     
     async def _prior_assessment_node(self, state: BTRADSState) -> BTRADSState:
         """Check for suitable prior imaging"""
+        logger.info(f"[DEBUG] Entering _prior_assessment_node for patient {state.get('patient_id')}")
         state["current_node"] = "prior_assessment"
         state["path"].append("prior_assessment")
         
         # Run agent
         agent = self.agents["prior_assessment"]
+        logger.info(f"[DEBUG] About to call prior_assessment agent.extract")
         result = await agent.extract(
             clinical_note=state["patient_data"].clinical_note,
             context=state["context"],
@@ -231,7 +235,11 @@ class LangGraphOrchestrator:
         
         # Store result
         state["agent_results"]["prior_assessment"] = result
-        state["decisions"]["has_prior"] = result.extracted_value.get("has_suitable_prior", False)
+        # Handle both string and dict extracted_value
+        if isinstance(result.extracted_value, dict):
+            state["decisions"]["has_prior"] = result.extracted_value.get("has_suitable_prior", False)
+        else:
+            state["decisions"]["has_prior"] = result.extracted_value
         state["reasoning"].append(f"Prior assessment: {result.reasoning}")
         state["confidence_scores"].append(result.confidence)
         
@@ -260,7 +268,12 @@ class LangGraphOrchestrator:
         
         # Store result
         state["agent_results"]["imaging_comparison"] = result
-        state["decisions"]["imaging_change"] = result.extracted_value.get("overall_assessment", "unknown")
+        # Handle both string and dict extracted_value
+        if isinstance(result.extracted_value, dict):
+            state["decisions"]["imaging_change"] = result.extracted_value.get("overall_assessment", "unknown")
+        else:
+            # extracted_value is already the assessment string
+            state["decisions"]["imaging_change"] = result.extracted_value
         state["reasoning"].append(f"Imaging comparison: {result.reasoning}")
         state["confidence_scores"].append(result.confidence)
         
@@ -327,7 +340,11 @@ class LangGraphOrchestrator:
         
         # Store result
         state["agent_results"]["component_analysis"] = result
-        state["decisions"]["component_pattern"] = result.extracted_value.get("pattern", "unknown")
+        # Handle both string and dict extracted_value
+        if isinstance(result.extracted_value, dict):
+            state["decisions"]["component_pattern"] = result.extracted_value.get("pattern", "unknown")
+        else:
+            state["decisions"]["component_pattern"] = result.extracted_value
         state["reasoning"].append(f"Component analysis: {result.reasoning}")
         state["confidence_scores"].append(result.confidence)
         
@@ -348,7 +365,11 @@ class LangGraphOrchestrator:
         
         # Store result
         state["agent_results"]["extent_analysis"] = result
-        state["decisions"]["extent"] = result.extracted_value.get("extent", "unknown")
+        # Handle both string and dict extracted_value
+        if isinstance(result.extracted_value, dict):
+            state["decisions"]["extent"] = result.extracted_value.get("extent", "unknown")
+        else:
+            state["decisions"]["extent"] = result.extracted_value
         state["reasoning"].append(f"Extent analysis: {result.reasoning}")
         state["confidence_scores"].append(result.confidence)
         
@@ -369,7 +390,11 @@ class LangGraphOrchestrator:
         
         # Store result
         state["agent_results"]["progression_pattern"] = result
-        state["decisions"]["progression_pattern"] = result.extracted_value.get("pattern", "unknown")
+        # Handle both string and dict extracted_value
+        if isinstance(result.extracted_value, dict):
+            state["decisions"]["progression_pattern"] = result.extracted_value.get("pattern", "unknown")
+        else:
+            state["decisions"]["progression_pattern"] = result.extracted_value
         state["reasoning"].append(f"Progression pattern: {result.reasoning}")
         state["confidence_scores"].append(result.confidence)
         
@@ -377,7 +402,7 @@ class LangGraphOrchestrator:
     
     # Terminal nodes
     async def _terminal_node_bt0(self, state: BTRADSState) -> BTRADSState:
-        state["btrads_score"] = "BT-0"
+        state["btrads_score"] = "0"
         state["reasoning"].append("No suitable prior for comparison")
         state["completed_at"] = datetime.utcnow()
         return state
@@ -493,6 +518,8 @@ class LangGraphOrchestrator:
     ) -> BTRADSResult:
         """Process a patient through the BT-RADS flowchart"""
         
+        logger.info(f"[Orchestrator] Starting processing for patient {patient_data.patient_id}")
+        
         # Initialize state
         initial_state = BTRADSState(
             patient_id=patient_data.patient_id,
@@ -513,9 +540,13 @@ class LangGraphOrchestrator:
             warnings=[]
         )
         
+        logger.info(f"[Orchestrator] Created initial state for {patient_data.patient_id}")
+        
         # Run the graph
         config = {"configurable": {"thread_id": patient_data.patient_id}}
+        logger.info(f"[Orchestrator] Invoking graph for {patient_data.patient_id}")
         final_state = await self.graph.ainvoke(initial_state, config)
+        logger.info(f"[Orchestrator] Graph completed for {patient_data.patient_id}")
         
         # Create result
         return self._create_result(final_state)
@@ -523,8 +554,8 @@ class LangGraphOrchestrator:
     def _prepare_context(self, patient_data: PatientData) -> Dict[str, Any]:
         """Prepare context for agents"""
         context = {
-            "baseline_date": patient_data.baseline_date.isoformat(),
-            "followup_date": patient_data.followup_date.isoformat(),
+            "baseline_date": patient_data.baseline_date.isoformat() if patient_data.baseline_date else None,
+            "followup_date": patient_data.followup_date.isoformat() if patient_data.followup_date else None,
             "flair_change_pct": patient_data.flair_change_percentage,
             "enhancement_change_pct": patient_data.enhancement_change_percentage,
         }
@@ -550,13 +581,28 @@ class LangGraphOrchestrator:
         for node in state["path"]:
             path.add_node(node, state["decisions"].get(node))
         
+        # Handle both formats (with and without BT- prefix)
+        score_value = state["btrads_score"]
+        if score_value and score_value.startswith("BT-"):
+            score_value = score_value[3:]  # Remove "BT-" prefix
+        
+        # Convert medication_status dict to string if needed
+        med_status = state["decisions"].get("medication_status")
+        if isinstance(med_status, dict):
+            # Format as string: "Steroids: status, Avastin: status"
+            steroid_status = med_status.get("steroid_status", "unknown")
+            avastin_status = med_status.get("avastin_status", "unknown")
+            medication_effects_str = f"Steroids: {steroid_status}, Avastin: {avastin_status}"
+        else:
+            medication_effects_str = med_status
+        
         return BTRADSResult(
             patient_id=state["patient_id"],
-            score=BTRADSScore(state["btrads_score"]),
+            score=BTRADSScore(score_value) if score_value else None,
             reasoning=" → ".join(state["reasoning"]),
             algorithm_path=path,
             volume_assessment=state["decisions"].get("imaging_change"),
-            medication_effects=state["decisions"].get("medication_status"),
+            medication_effects=medication_effects_str,
             time_since_radiation=state["context"].get("days_since_radiation"),
             total_validations=len([v for v in state["pending_validations"] if v.get("validated")]),
             modifications_made=0,  # TODO: Track modifications
@@ -575,12 +621,16 @@ class LangGraphOrchestrator:
         status: str,
         data: Dict[str, Any]
     ):
-        """Send status update via WebSocket"""
-        await self.ws_manager.send_to_patient(
-            patient_id,
-            {
-                "type": status,
-                "timestamp": datetime.utcnow().isoformat(),
-                **data
-            }
-        )
+        """Send status update via WebSocket (non-blocking)"""
+        try:
+            # Don't await - fire and forget to avoid blocking if no websocket connected
+            asyncio.create_task(self.ws_manager.send_to_patient(
+                patient_id,
+                {
+                    "type": status,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    **data
+                }
+            ))
+        except Exception as e:
+            logger.debug(f"WebSocket notification failed (non-critical): {e}")

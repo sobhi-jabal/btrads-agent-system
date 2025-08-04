@@ -8,10 +8,14 @@ import uvicorn
 import logging
 from typing import Dict
 import asyncio
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from api.routes import patients, agents, validation, reports, llm, vllm_extract
 from services.websocket_manager import WebSocketManager
-from services.patient_service import PatientService
+from services.patient_service_sqlite import PatientService
 from config.agent_config import agent_config
 from utils.database import init_db
 from utils.startup_checks import run_startup_checks
@@ -51,7 +55,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"System starting in {startup_results['agent_mode']} mode")
     
     # Initialize database
-    # await init_db()  # Disabled for testing without PostgreSQL
+    await init_db()  # Now using SQLite with auto-initialization
     
     # Re-initialize orchestrator with correct agent mode
     global orchestrator
@@ -75,10 +79,12 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js dev server
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "*"],  # Allow all origins for dev
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 # Include routers

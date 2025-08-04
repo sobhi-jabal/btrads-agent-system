@@ -6,6 +6,8 @@ import time
 from datetime import datetime
 import logging
 import json
+import ollama
+from ollama import Options
 
 from models.agent import AgentResult, HighlightedSource
 
@@ -34,66 +36,114 @@ class SimpleBaseAgent(ABC):
         """Main extraction method - must be implemented by each agent"""
         pass
     
-    async def _call_llm(self, prompt: str) -> Dict[str, Any]:
-        """Mock LLM call for now - returns structured data"""
-        # In production, this would call Ollama
-        # For now, return mock data based on the agent type
-        mock_responses = {
-            "prior-assessment": {
-                "has_prior": True,
-                "confidence": 0.85,
-                "reasoning": "Found mention of prior imaging",
-                "evidence_sentences": ["Prior MRI from 6 months ago shows..."]
-            },
-            "imaging-comparison": {
-                "volume_change": 25.5,
-                "change_type": "increase",
-                "confidence": 0.9,
-                "reasoning": "Clear volume measurements provided",
-                "evidence_sentences": ["FLAIR volume increased by 25.5%"]
-            },
-            "medication-status": {
-                "on_medication": True,
-                "medication_type": "corticosteroids",
-                "confidence": 0.8,
-                "reasoning": "Patient on dexamethasone",
-                "evidence_sentences": ["Currently on dexamethasone 4mg daily"]
-            },
-            "radiation-timeline": {
-                "radiation_date_str": "2024-01-15",
-                "radiation_type": "stereotactic radiosurgery",
-                "confidence": 0.9,
-                "reasoning": "Found radiation date",
-                "evidence_sentences": ["Completed SRS on January 15, 2024"]
-            },
-            "component-analysis": {
-                "enhancement_pattern": "peripheral",
-                "necrosis_present": True,
-                "confidence": 0.85,
-                "reasoning": "Peripheral enhancement with central necrosis",
-                "evidence_sentences": ["Shows peripheral enhancement with central necrosis"]
-            },
-            "extent-analysis": {
-                "extent": "multifocal",
-                "locations": ["frontal", "parietal"],
-                "confidence": 0.9,
-                "reasoning": "Multiple lesions noted",
-                "evidence_sentences": ["Multifocal lesions in frontal and parietal lobes"]
-            },
-            "progression-pattern": {
-                "pattern": "local",
-                "confidence": 0.85,
-                "reasoning": "Progression at treatment site",
-                "evidence_sentences": ["Local progression at the treatment site"]
-            }
-        }
+    def _chunk_clinical_note(self, text: str, chunk_size: int = 800, overlap: int = 150) -> List[str]:
+        """Split clinical note into overlapping chunks like the old implementation"""
+        if len(text) <= chunk_size * 2:
+            return [text]  # Return full text if it's short enough
         
-        await asyncio.sleep(0.5)  # Simulate processing time
-        return mock_responses.get(self.agent_id, {
-            "confidence": 0.5,
-            "reasoning": "Default mock response",
-            "evidence_sentences": []
-        })
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = min(start + chunk_size, len(text))
+            chunk = text[start:end]
+            chunks.append(chunk)
+            start = end - overlap if end < len(text) else end
+        
+        return chunks
+    
+    def _extract_relevant_context(self, clinical_note: str, query_keywords: List[str], max_context: int = 65000) -> str:
+        """Return full clinical note (no RAG chunking) - matches old btrads_main_old.py in full mode"""
+        # Simply return the full text up to max_context
+        # This matches the old implementation's --mode full behavior
+        return clinical_note[:max_context] if len(clinical_note) > max_context else clinical_note
+    
+    async def _call_llm(self, prompt: str, output_format: str = "json") -> Dict[str, Any]:
+        """Call Ollama LLM with the prompt"""
+        logger.info(f"[DEBUG] _call_llm called with prompt length: {len(prompt)}")
+        try:
+            # Configure Ollama options with larger context for clinical notes
+            options = Options(
+                temperature=0.1,
+                top_k=40,
+                top_p=0.95,
+                num_ctx=16000,  # Larger context for phi4:14b like in old implementation
+                num_predict=512,  # Standard output length
+                repeat_penalty=1.1,
+                seed=42
+            )
+            
+            # Prepare messages for chat format
+            messages = [
+                {"role": "system", "content": "You are an expert medical data extractor for BT-RADS brain tumor classification."},
+                {"role": "user", "content": prompt}
+            ]
+            
+            # Try up to 3 times with retries
+            for attempt in range(3):
+                try:
+                    logger.info(f"[DEBUG] Calling Ollama with llama3.2:latest, attempt {attempt+1}/3")
+                    
+                    # Use Ollama AsyncClient directly
+                    from ollama import AsyncClient
+                    client = AsyncClient()
+                    
+                    # Call with timeout
+                    timeout_seconds = 30  # Reasonable timeout for llama3.2
+                    
+                    try:
+                        response = await asyncio.wait_for(
+                            client.chat(
+                                model="llama3.2:latest",
+                                format="json" if output_format == "json" else None,
+                                keep_alive="10m",
+                                options=options,
+                                messages=messages
+                            ),
+                            timeout=timeout_seconds
+                        )
+                        logger.info(f"[DEBUG] Ollama returned response")
+                    except asyncio.TimeoutError:
+                        logger.error(f"Ollama timeout after {timeout_seconds} seconds on attempt {attempt+1}/3")
+                        raise TimeoutError(f"Ollama did not respond within {timeout_seconds} seconds")
+                    
+                    content = response.get("message", {}).get("content", "")
+                    if not content.strip():
+                        raise ValueError("Empty response from Ollama")
+                    
+                    # Parse JSON response
+                    if output_format == "json":
+                        try:
+                            # Try to parse as JSON
+                            parsed = json.loads(content)
+                            return parsed
+                        except json.JSONDecodeError:
+                            # Try to extract JSON from text
+                            start = content.find("{")
+                            end = content.rfind("}") + 1
+                            if start >= 0 and end > start:
+                                json_str = content[start:end]
+                                parsed = json.loads(json_str)
+                                return parsed
+                            raise ValueError(f"Could not parse JSON from response: {content[:200]}")
+                    else:
+                        return {"text": content}
+                        
+                except Exception as e:
+                    logger.warning(f"Ollama attempt {attempt+1}/3 failed: {e}")
+                    if attempt < 2:
+                        await asyncio.sleep(2)
+                    else:
+                        raise
+                        
+        except Exception as e:
+            logger.error(f"Ollama LLM call failed: {e}")
+            # Return error response (no fallback to mock data)
+            return {
+                "error": True,
+                "message": str(e),
+                "confidence": 0.0,
+                "reasoning": f"LLM extraction failed: {e}"
+            }
     
     async def _highlight_sources(
         self,
@@ -129,7 +179,7 @@ class SimpleBaseAgent(ABC):
             reasoning=f"Error: {error_msg}",
             source_highlights=[],
             processing_time_ms=0,
-            llm_model="mock-llm"
+            llm_model="phi4:14b"
         )
     
     async def validate(self, result: AgentResult, feedback: Dict[str, Any]) -> AgentResult:

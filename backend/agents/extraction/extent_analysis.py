@@ -55,7 +55,7 @@ class ExtentAnalysisAgent(SimpleBaseAgent):
             """
             
             # Get LLM response
-            response = await self._call_llm(prompt)
+            response = await self._call_llm(prompt, output_format="json")
             
             # Determine extent category
             is_localized = response.get("is_localized", True)
@@ -87,7 +87,7 @@ class ExtentAnalysisAgent(SimpleBaseAgent):
                 reasoning=response.get("reasoning", ""),
                 source_highlights=source_highlights,
                 processing_time_ms=processing_time,
-                llm_model="mock-llm"
+                llm_model="phi4:14b"
             )
             
         except Exception as e:

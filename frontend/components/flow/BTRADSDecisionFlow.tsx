@@ -40,13 +40,13 @@ import {
   extractDataPointsLLM,
   extractMedicationsNLP, 
   extractRadiationDateNLP,
+  transformEvidence,
   type ExtractionMode,
-  type ExtractionResult 
+  type ExtractionResult
 } from './ExtractionFunctions'
 import { ExtractionComparison } from './BTRADSComparisonView'
 import { InlineMedicationForm } from './InlineMedicationForm'
 import { InlineRadiationForm } from './InlineRadiationForm'
-import { transformEvidence } from './ExtractionFunctions'
 import { handleLLMMedications, handleLLMRadiation, transformLLMEvidence } from './LLMExtractionHandler'
 import { downloadBTRADSReport, type BTRADSReportData } from '@/utils/reportGenerator'
 import { MissingInfoTracker } from './MissingInfoTracker'
@@ -128,6 +128,7 @@ export function BTRADSDecisionFlow({
   const [userProvidedData, setUserProvidedData] = useState<Record<string, UserProvidedData>>({})
   const [missingInfoCollector] = useState(() => new MissingInfoCollector())
   const [missingInfoItems, setMissingInfoItems] = useState<MissingInfoItem[]>([])
+  const [finalResult, setFinalResult] = useState<any>(null)
 
   // Initialize with flowchart nodes
   useEffect(() => {
@@ -194,26 +195,103 @@ export function BTRADSDecisionFlow({
     try {
       // Extract data points first if we have clinical note
       if (patient?.data?.clinical_note) {
+        console.log('[BTRADSFlow] Starting data extraction with mode:', extractionMode)
+        console.log('[BTRADSFlow] Clinical note length:', patient.data.clinical_note.length)
+        
         results = await extractDataPoints(patient.data.clinical_note, extractionMode, patient.data.followup_date)
+        
+        console.log('[BTRADSFlow] Extraction results:', {
+          hasNLP: !!results.nlp,
+          hasLLM: !!results.llm,
+          nlpMedications: results.nlp?.medications,
+          llmMedications: results.llm?.medications,
+          nlpRadiation: results.nlp?.radiationDate,
+          llmRadiation: results.llm?.radiationDate
+        })
+        
         setExtractionResults(results)
         
         // Removed missing info check - will handle inline at each step
       } else {
+        console.warn('[BTRADSFlow] No clinical note available for patient')
         setExtractionResults(results) // Set empty extraction results
       }
       
       // Start the actual processing
+      console.log('[BTRADSFlow] Starting backend processing for patient:', patientId)
       await api.patients.startProcessing(patientId, false)
       
-      // Simulate step-by-step processing for demonstration
-      await simulateProcessingSteps('start', patient, results)
+      // Poll for results instead of simulating
+      console.log('[BTRADSFlow] Polling for backend results...')
+      await pollForResults(patientId)
     } catch (error) {
-      console.error('Error during processing:', error)
+      console.error('[BTRADSFlow] Error during processing:', error)
+      console.error('[BTRADSFlow] Error stack:', error instanceof Error ? error.stack : String(error))
       setIsProcessing(false)
       // Reset steps to show error state
       setProcessingSteps(prev => prev.map(step => 
         step.status === 'processing' ? { ...step, status: 'error' } : step
       ))
+    }
+  }
+  
+  const pollForResults = async (patientId: string) => {
+    const maxAttempts = 300 // Poll for up to 5 minutes (Ollama can be slower)
+    let attempts = 0
+    
+    while (attempts < maxAttempts) {
+      try {
+        // Check processing status
+        const status = await api.patients.getStatus(patientId)
+        console.log('[BTRADSFlow] Processing status:', status)
+        
+        if (status.status === 'completed' || status.completed === true) {
+          // Get the final result - it's embedded in the status response
+          const result = status.result ? JSON.parse(status.result) : await api.patients.getResult(patientId)
+          console.log('[BTRADSFlow] Got backend result:', result)
+          
+          if (result) {
+            // Update UI with real results
+            displayBackendResults(result)
+            setIsProcessing(false)
+            return
+          }
+        } else if (status.status === 'error') {
+          console.error('[BTRADSFlow] Backend processing failed')
+          setIsProcessing(false)
+          setProcessingSteps(prev => prev.map(step => ({ ...step, status: 'error' })))
+          return
+        }
+        
+        // Wait 1 second before next poll
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        attempts++
+      } catch (error) {
+        console.error('[BTRADSFlow] Error polling for results:', error)
+        attempts++
+      }
+    }
+    
+    console.error('[BTRADSFlow] Polling timeout - processing took too long')
+    setIsProcessing(false)
+  }
+  
+  const displayBackendResults = (result: any) => {
+    console.log('[BTRADSFlow] Displaying backend results:', result)
+    
+    // Update final result
+    setFinalResult({
+      score: result.score || 'Unknown',
+      reasoning: result.reasoning || 'No reasoning provided',
+      confidence: result.confidence_score || 0
+    })
+    
+    // Mark all steps as completed
+    setProcessingSteps(prev => prev.map(step => ({ ...step, status: 'completed' })))
+    
+    // Show the algorithm path if available
+    if (result.algorithm_path?.nodes_visited) {
+      console.log('[BTRADSFlow] Algorithm path:', result.algorithm_path.nodes_visited)
     }
   }
   
@@ -274,7 +352,7 @@ export function BTRADSDecisionFlow({
           })
           
           // Add new evidence
-          processedStep.evidence.forEach((item: EvidenceItem) => {
+          processedStep.evidence?.forEach((item: EvidenceItem) => {
             const key = `${item.sourceText}-${item.startIndex}-${item.endIndex}`
             if (!evidenceMap.has(key)) {
               evidenceMap.set(key, {
@@ -878,8 +956,13 @@ export function BTRADSDecisionFlow({
         if (isMissing) {
           // Track missing information
           missingInfoCollector.addMissingInfo({
-            node: 'node_3a_on_medications',
+            type: 'medication_status',
             field: 'medications',
+            label: 'Medication Status',
+            description: 'Unable to determine medication status from clinical note',
+            severity: 'critical',
+            requiredFor: ['BT-RADS medication effects assessment'],
+            node: 'node_3a_on_medications',
             issue: 'Unable to determine medication status from clinical note',
             impact: 'high',
             clinicalImpact: 'May misclassify improvement as medication effect vs true improvement',
@@ -891,8 +974,12 @@ export function BTRADSDecisionFlow({
           // Format extraction result for the inline form
           const formattedExtraction = medExtraction ? {
             value: {
-              steroidStatus: medExtraction.steroidStatus || 'unknown',
-              avastinStatus: medExtraction.avastinStatus || 'unknown',
+              steroidStatus: extractionMode === 'llm' && 'data' in medExtraction 
+                ? medExtraction.data?.steroidStatus || 'unknown'
+                : ('steroidStatus' in medExtraction ? medExtraction.steroidStatus : 'unknown'),
+              avastinStatus: extractionMode === 'llm' && 'data' in medExtraction
+                ? medExtraction.data?.avastinStatus || 'unknown'
+                : ('avastinStatus' in medExtraction ? medExtraction.avastinStatus : 'unknown'),
               evidence: medExtraction.evidence || []
             },
             confidence: medExtraction.confidence || 0,
@@ -929,6 +1016,10 @@ export function BTRADSDecisionFlow({
         let stableDose = false
         let extractedEvidence: any[] = []
         let medAnalysis = ''
+        
+        // Define pattern names for use in decision criteria
+        const avastinPatternNames = ['Avastin', 'Bevacizumab', 'Bev abbreviation', 'Anti-angiogenic', 'VEGF inhibitor', 'Anti-VEGF']
+        const steroidPatternNames = ['Dexamethasone', 'Decadron', 'Prednisone', 'Prednisolone', 'Methylprednisolone', 'Steroid (generic)', 'Corticosteroid']
         
         if (extractionMode === 'llm' && extraction.llm?.medications) {
           // Use dedicated LLM handler with clinical note for position finding
@@ -970,7 +1061,6 @@ export function BTRADSDecisionFlow({
             /avastin/gi, /bevacizumab/gi, /bev\b/gi, /anti-angiogenic/gi,
             /vegf\s*inhibitor/gi, /anti-vegf/gi
           ]
-          const avastinPatternNames = ['Avastin', 'Bevacizumab', 'Bev abbreviation', 'Anti-angiogenic', 'VEGF inhibitor', 'Anti-VEGF']
           const avastinDetected = avastinPatterns.some(pattern => pattern.test(clinicalNote))
           
           // Enhanced steroid detection with specific medications
@@ -978,7 +1068,6 @@ export function BTRADSDecisionFlow({
             /dexamethasone/gi, /decadron/gi, /prednisone/gi, /prednisolone/gi,
             /methylprednisolone/gi, /steroid/gi, /corticosteroid/gi
           ]
-          const steroidPatternNames = ['Dexamethasone', 'Decadron', 'Prednisone', 'Prednisolone', 'Methylprednisolone', 'Steroid (generic)', 'Corticosteroid']
           const steroidsDetected = steroidPatterns.some(pattern => pattern.test(clinicalNote))
           
           // Additional context analysis
@@ -1233,8 +1322,13 @@ export function BTRADSDecisionFlow({
         if (radIsMissing) {
           // Track missing information
           missingInfoCollector.addMissingInfo({
-            node: 'node_4_time_since_xrt',
+            type: 'radiation_date',
             field: 'radiation_date',
+            label: 'Radiation Treatment Date',
+            description: 'Unable to determine radiation treatment date from clinical note',
+            severity: 'critical',
+            requiredFor: ['90-day radiation rule assessment'],
+            node: 'node_4_time_since_xrt',
             issue: 'Unable to determine radiation treatment date from clinical note',
             impact: 'critical',
             clinicalImpact: 'Cannot apply 90-day rule for treatment effects vs progression',
@@ -2689,18 +2783,18 @@ Conclusion: ${likelySteroidsEffect ?
                     finalDecision: finalStep.data?.category || '',
                     reasoning: finalStep.reasoning || '',
                     decisionPath: processingSteps
-                      .filter(step => step.status === 'completed' && step.name)
+                      .filter(step => step.status === 'completed' && step.label)
                       .map(step => ({
-                        step: step.name,
+                        step: step.label,
                         decision: step.data?.assessment || step.data?.medicationPath || step.data?.timeCategory || 'N/A',
                         reasoning: step.reasoning || ''
                       })),
                     evidence: aggregatedEvidence,
                     extractedData: {
-                      steroidStatus: extractionResults?.medications?.steroidStatus,
-                      avastinStatus: extractionResults?.medications?.avastinStatus,
-                      radiationDate: extractionResults?.radiationDate?.radiationDate,
-                      imagingAssessment: processingSteps.find(s => s.id === 'node_2_imaging_assessment')?.data?.assessment
+                      steroidStatus: extractionResults?.nlp?.medications?.steroidStatus || extractionResults?.llm?.medications?.data?.steroidStatus,
+                      avastinStatus: extractionResults?.nlp?.medications?.avastinStatus || extractionResults?.llm?.medications?.data?.avastinStatus,
+                      radiationDate: extractionResults?.nlp?.radiationDate?.date || extractionResults?.llm?.radiationDate?.data?.radiation_date,
+                      imagingAssessment: processingSteps.find(s => s.nodeId === 'node_2_imaging_assessment')?.data?.assessment
                     },
                     timestamp: new Date().toISOString()
                   }
