@@ -1,53 +1,63 @@
 """Database utilities and initialization"""
 import os
+import pandas as pd
 from typing import Optional
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
-import asyncpg
 from contextlib import asynccontextmanager
+from datetime import datetime
+import json
 
-# Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/btrads_db")
+# Database configuration - Using SQLite for simple local deployment
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./btrads.db")
 
 # SQLAlchemy setup
-engine = create_engine(
-    DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://"),
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
-    poolclass=StaticPool if "sqlite" in DATABASE_URL else None,
-)
+if "sqlite" in DATABASE_URL:
+    # SQLite configuration for local deployment
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+else:
+    # PostgreSQL configuration (for production if needed)
+    engine = create_engine(
+        DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://"),
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Async database pool
-async_pool: Optional[asyncpg.Pool] = None
+# For SQLite, we don't need async pool
+async_pool = None
 
 async def init_db():
-    """Initialize database connections and create tables"""
-    global async_pool
-    
-    # Create async connection pool
-    if not async_pool:
-        async_pool = await asyncpg.create_pool(
-            DATABASE_URL,
-            min_size=10,
-            max_size=20,
-            command_timeout=60
-        )
-    
-    # Create tables (for development)
+    """Initialize database and create tables"""
+    # Create all tables
     Base.metadata.create_all(bind=engine)
     
-    return async_pool
+    # Load sample data if database is empty
+    db = SessionLocal()
+    try:
+        # Check if we have any patients
+        patient_count = db.query(PatientRecord).count()
+        
+        if patient_count == 0:
+            print("Database is empty. NOT loading sample data to keep clean state.")
+            # DISABLED - We don't want sample data on startup
+            # load_sample_data(db)
+            # print("Sample data loaded successfully!")
+    finally:
+        db.close()
+    
+    return None
 
 async def close_db():
     """Close database connections"""
-    global async_pool
-    if async_pool:
-        await async_pool.close()
-        async_pool = None
+    # For SQLite, we don't need to close a pool
+    pass
 
 def get_db() -> Session:
     """Get database session"""
@@ -59,9 +69,12 @@ def get_db() -> Session:
 
 @asynccontextmanager
 async def get_async_db():
-    """Get async database connection"""
-    async with async_pool.acquire() as connection:
-        yield connection
+    """Get database connection (using sync for SQLite)"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Database models
 from sqlalchemy import Column, String, DateTime, JSON, Boolean, Float, Date, Integer, Text
@@ -100,6 +113,8 @@ class PatientRecord(Base):
     btrads_result = Column(JSON, nullable=True)
     algorithm_path = Column(JSON, nullable=True)
     validation_history = Column(JSON, nullable=True)
+    validation_result = Column(JSON, nullable=True)
+    user_corrections = Column(JSON, nullable=True)
 
 class AgentResultRecord(Base):
     __tablename__ = "agent_results"
@@ -127,3 +142,53 @@ class AgentResultRecord(Base):
     processing_time_ms = Column(Integer)
     llm_model = Column(String)
     missing_info = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
+
+
+def load_sample_data(db: Session):
+    """Load sample data from CSV file"""
+    import os
+    
+    # Try to find the CSV file
+    csv_paths = [
+        "./sample_btrads_data.csv",
+        "../sample_btrads_data.csv",
+        "../../sample_btrads_data.csv",
+        "/Users/sobhi/Desktop/Claude_Code/Duke/Evan/BTRADS_Agents/btrads-agent-system/sample_btrads_data.csv"
+    ]
+    
+    csv_file = None
+    for path in csv_paths:
+        if os.path.exists(path):
+            csv_file = path
+            break
+    
+    if not csv_file:
+        print("Warning: No sample data file found")
+        return
+    
+    # Read the CSV file
+    df = pd.read_csv(csv_file)
+    
+    # Map CSV columns to database fields
+    for _, row in df.iterrows():
+        patient = PatientRecord(
+            id=row['Patient ID'],
+            clinical_note=row['Clinical Note'],
+            baseline_date=pd.to_datetime(row['Baseline_imaging_date']).date() if pd.notna(row['Baseline_imaging_date']) else None,
+            followup_date=pd.to_datetime(row['Followup_imaging_date']).date() if pd.notna(row['Followup_imaging_date']) else None,
+            radiation_date=pd.to_datetime(row['Radiation_completion_date']).date() if pd.notna(row['Radiation_completion_date']) else None,
+            baseline_flair_volume=float(row['Baseline_flair_volume']) if pd.notna(row['Baseline_flair_volume']) else None,
+            followup_flair_volume=float(row['Followup_flair_volume']) if pd.notna(row['Followup_flair_volume']) else None,
+            flair_change_percentage=float(row['Volume_Difference_flair_Percentage_Change']) if pd.notna(row['Volume_Difference_flair_Percentage_Change']) else None,
+            baseline_enhancement_volume=float(row['Baseline_enhancement_volume']) if pd.notna(row['Baseline_enhancement_volume']) else None,
+            followup_enhancement_volume=float(row['Followup_enhancement_volume']) if pd.notna(row['Followup_enhancement_volume']) else None,
+            enhancement_change_percentage=float(row['Volume_Difference_enhancement_Percentage_Change']) if pd.notna(row['Volume_Difference_enhancement_Percentage_Change']) else None,
+            ground_truth_btrads=row['BTRADS (Precise Category)'] if pd.notna(row['BTRADS (Precise Category)']) else None,
+            processing_status='pending',
+            completed=False
+        )
+        db.add(patient)
+    
+    db.commit()
+    print(f"Loaded {len(df)} patients from {csv_file}")

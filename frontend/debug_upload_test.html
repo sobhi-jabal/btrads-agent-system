@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Upload Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-left: 3px solid #007acc; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        input { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>CSV Upload Debug Test</h1>
+    <p>This is a standalone test to verify the upload process works correctly.</p>
+    
+    <input type="file" id="csvFile" accept=".csv" />
+    <button onclick="testUpload()">Test Upload</button>
+    
+    <div id="logs"></div>
+    
+    <script>
+        function log(message) {
+            const logsDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log';
+            logEntry.textContent = new Date().toISOString() + ': ' + message;
+            logsDiv.appendChild(logEntry);
+            console.log(message);
+        }
+        
+        async function testUpload() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                log('No file selected');
+                return;
+            }
+            
+            log('File selected: ' + file.name + ', Size: ' + file.size);
+            
+            try {
+                // Step 1: Read file content
+                log('Reading file content...');
+                const text = await file.text();
+                log('File content read, length: ' + text.length);
+                
+                // Step 2: Upload to API
+                log('Creating FormData...');
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                log('Making POST request to API...');
+                const response = await fetch('http://localhost:8001/api/patients/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('Upload successful! Received ' + data.length + ' patients');
+                    console.log('Response data:', data);
+                } else {
+                    log('Upload failed with status: ' + response.status);
+                    const errorText = await response.text();
+                    log('Error details: ' + errorText);
+                }
+                
+            } catch (error) {
+                log('Upload error: ' + error.message);
+                console.error('Full error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

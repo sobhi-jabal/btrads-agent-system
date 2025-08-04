@@ -29,13 +29,21 @@ class ImagingComparisonAgent(SimpleBaseAgent):
             baseline_date = context.get("baseline_date", "unknown")
             followup_date = context.get("followup_date", "unknown")
             
+            # Use full clinical note (no RAG chunking)
+            imaging_keywords = [
+                'MRI', 'imaging', 'scan', 'FLAIR', 'enhancement', 'contrast',
+                'increased', 'decreased', 'stable', 'unchanged', 'worse', 'improved',
+                'progression', 'regression', 'volume', 'size', 'lesion', 'tumor'
+            ]
+            relevant_context = self._extract_relevant_context(clinical_note, imaging_keywords, max_context=3000)
+            
             # Create prompt for imaging comparison
             prompt = f"""
             You are a neuroradiology expert applying BT-RADS imaging assessment criteria using quantitative volume data.
             Your task is to compare current imaging with prior using both volume measurements and clinical descriptions.
             
             Clinical Note:
-            {clinical_note}
+            {relevant_context}
             
             VOLUME DATA:
             - Baseline imaging: {baseline_date}
@@ -67,10 +75,16 @@ class ImagingComparisonAgent(SimpleBaseAgent):
             """
             
             # Get LLM response
-            response = await self._call_llm(prompt)
+            response = await self._call_llm(prompt, output_format="json")
             
-            # Extract the assessment
-            assessment = response.get("assessment", "unknown")
+            # Check if LLM call failed
+            if response.get("error", False):
+                # Set appropriate default value when LLM fails
+                assessment = "unknown"
+                logger.warning(f"LLM extraction failed, using default: {response.get('message', 'Unknown error')}")
+            else:
+                # Extract the assessment
+                assessment = response.get("assessment", "unknown")
             
             # Validate against volume data
             if assessment != "unknown" and flair_change_pct is not None and enhancement_change_pct is not None:
@@ -104,7 +118,7 @@ class ImagingComparisonAgent(SimpleBaseAgent):
                 reasoning=response.get("reasoning", ""),
                 source_highlights=source_highlights,
                 processing_time_ms=processing_time,
-                llm_model="mock-llm",
+                llm_model="phi4:14b",
                 metadata={
                     "volume_pattern": response.get("volume_pattern", "unknown"),
                     "enhancement_priority_applied": response.get("enhancement_priority_applied", False),

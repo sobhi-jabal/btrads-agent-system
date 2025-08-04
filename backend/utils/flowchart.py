@@ -59,52 +59,21 @@ class BTRADSFlowchart:
                 "description": "No significant change"
             },
             
-            # Node 3A: Medication Effects
+            # Node 3A: Medication Status
             "node_3a_medications": {
                 "id": "node_3a_medications",
                 "type": "data_extraction",
-                "agent": "medication_effects",
+                "agent": "medication_status",
                 "label": "On Medications?",
                 "description": "Check for Avastin or increasing steroids",
                 "next_nodes": {
-                    "avastin": "node_3b_avastin_response",
-                    "increasing_steroids": "node_3c_steroid_effects",
+                    "avastin": "outcome_bt_1b",  # Direct to BT-1b for Avastin
+                    "increasing_steroids": "outcome_bt_1b",  # Direct to BT-1b for steroids
                     "neither": "outcome_bt_1a",
-                    "unknown": "outcome_bt_1a"  # Fallback: assume no medication effect
-                },
-                "default_next": "outcome_bt_1a"
-            },
-            
-            # Node 3B: Avastin Response
-            "node_3b_avastin_response": {
-                "id": "node_3b_avastin_response",
-                "type": "data_extraction",
-                "agent": "avastin_response",
-                "label": "Avastin Response Type",
-                "description": "Determine type of Avastin response",
-                "next_nodes": {
-                    "first_study_enh_only": "outcome_bt_1b",
-                    "sustained_improvement": "outcome_bt_1a",
                     "unknown": "outcome_bt_1b"  # Fallback: conservative
                 },
                 "default_next": "outcome_bt_1b"
             },
-            
-            # Node 3C: Steroid Effects
-            "node_3c_steroid_effects": {
-                "id": "node_3c_steroid_effects",
-                "type": "data_extraction",
-                "agent": "steroid_effects",
-                "label": "Steroid Effect Likely?",
-                "description": "Determine if steroids explain improvement",
-                "next_nodes": {
-                    "likely_steroid_effect": "outcome_bt_1b",
-                    "unlikely_steroid_effect": "outcome_bt_1a",
-                    "unknown": "outcome_bt_1b"  # Fallback: conservative
-                },
-                "default_next": "outcome_bt_1b"
-            },
-            
             # Outcomes: BT-1a and BT-1b
             "outcome_bt_1a": {
                 "id": "outcome_bt_1a",

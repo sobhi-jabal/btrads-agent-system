@@ -1,0 +1,3 @@
+patient_id,clinical_note
+FLOW001,"Test patient 1 with glioma"
+FLOW002,"Test patient 2 post-radiation"

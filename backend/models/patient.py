@@ -4,12 +4,19 @@ from typing import Optional, Dict, Any
 from datetime import date, datetime
 from enum import Enum
 
+class ProcessingStatus(str, Enum):
+    """Processing status enum"""
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    ERROR = "error"
+
 class PatientData(BaseModel):
     """Patient data model"""
     patient_id: Optional[str] = None
     clinical_note: str
-    baseline_date: date
-    followup_date: date
+    baseline_date: Optional[date] = None
+    followup_date: Optional[date] = None
     radiation_date: Optional[date] = None
     
     # Volume measurements

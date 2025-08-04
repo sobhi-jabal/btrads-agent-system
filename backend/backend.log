@@ -1,0 +1,80 @@
+INFO:     Will watch for changes in these directories: ['/Users/sobhi/Desktop/Claude_Code/Duke/Evan/BTRADS_Agents/btrads-agent-system/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [4734] using WatchFiles
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:main:Using LangGraphOrchestrator for orchestration
+INFO:     Started server process [4741]
+INFO:     Waiting for application startup.
+INFO:main:Starting BT-RADS Multi-Agent System...
+INFO:utils.startup_checks:Running startup checks...
+INFO:utils.startup_checks:==================================================
+ERROR:utils.startup_checks:❌ PostgreSQL not available: invalid DSN: scheme is expected to be either "postgresql" or "postgres", got 'sqlite'
+ERROR:utils.startup_checks:❌ Redis not available: Error 61 connecting to localhost:6379. 61.
+INFO:utils.startup_checks:✅ Ollama service is available with 4 models
+ERROR:utils.startup_checks:❌ vLLM service not available: 
+INFO:utils.startup_checks:==================================================
+INFO:utils.startup_checks:Startup Check Summary:
+INFO:utils.startup_checks:  Agent Mode: ollama
+INFO:utils.startup_checks:  Services: {'postgres': False, 'redis': False, 'ollama': True, 'vllm': False}
+ERROR:utils.startup_checks:  Errors:
+ERROR:utils.startup_checks:    - Cannot connect to database: invalid DSN: scheme is expected to be either "postgresql" or "postgres", got 'sqlite'
+ERROR:utils.startup_checks:    - Cannot connect to Redis at redis://localhost:6379
+ERROR:utils.startup_checks:    - Cannot connect to vLLM at http://localhost:8000
+INFO:utils.startup_checks:==================================================
+ERROR:main:Required services are not available. Please check configuration.
+INFO:main:System starting in ollama mode
+INFO:agents.orchestration.langgraph_orchestrator:Initialized prior_assessment agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized imaging_comparison agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized medication_status agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized radiation_timeline agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized component_analysis agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized extent_analysis agent
+INFO:agents.orchestration.langgraph_orchestrator:Initialized progression_pattern agent
+INFO:     Application startup complete.
+INFO:     127.0.0.1:62915 - "POST /api/patients/1_fa654762/process HTTP/1.1" 200 OK
+INFO:agents.orchestration.langgraph_orchestrator:[Orchestrator] Starting processing for patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:[Orchestrator] Created initial state for 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:[Orchestrator] Invoking graph for 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:[DEBUG] Entering _start_node for patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:[DEBUG] Exiting _start_node for patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:[DEBUG] Entering _prior_assessment_node for patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:[DEBUG] About to call prior_assessment agent.extract
+INFO:agents.extraction.prior_assessment:[DEBUG] PriorAssessmentAgent.extract called for patient 1_fa654762
+INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 8634
+INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 4603
+INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 13072
+INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 13348
+INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 13510
+INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.base_simple:[DEBUG] _call_llm called with prompt length: 13719
+INFO:agents.base_simple:[DEBUG] Calling Ollama with llama3.2:latest, attempt 1/3
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:agents.base_simple:[DEBUG] Ollama returned response
+INFO:agents.orchestration.langgraph_orchestrator:[Orchestrator] Graph completed for 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for prior-assessment - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for imaging-comparison - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for radiation-timeline - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for component-analysis - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for extent-analysis - patient 1_fa654762
+INFO:agents.orchestration.langgraph_orchestrator:Saved agent result for progression-pattern - patient 1_fa654762
+INFO:     127.0.0.1:63544 - "GET /api/agents/results/1_fa654762 HTTP/1.1" 200 OK

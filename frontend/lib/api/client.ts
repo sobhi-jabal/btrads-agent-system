@@ -21,7 +21,7 @@ apiClient.interceptors.request.use((config) => {
 export const api = {
   patients: {
     list: async (params?: any) => {
-      const { data } = await apiClient.get('/api/patients', { params })
+      const { data } = await apiClient.get('/api/patients/', { params })
       return data
     },
     
@@ -43,9 +43,17 @@ export const api = {
     upload: async (file: File) => {
       const formData = new FormData()
       formData.append('file', file)
-      const { data } = await apiClient.post('/api/patients/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      
+      // Use axios directly to avoid header conflicts
+      const { data } = await axios.post(
+        `${API_BASE_URL}/api/patients/upload`,
+        formData,
+        {
+          headers: {
+            // Let browser set Content-Type with boundary automatically
+          }
+        }
+      );
       return data
     },
     
@@ -59,6 +67,17 @@ export const api = {
     getStatus: async (id: string) => {
       const { data } = await apiClient.get(`/api/patients/${id}/status`)
       return data
+    },
+    
+    getResult: async (id: string) => {
+      const { data } = await apiClient.get(`/api/patients/${id}`)
+      // Extract BT-RADS result if available
+      if (data.btrads_result) {
+        return typeof data.btrads_result === 'string' 
+          ? JSON.parse(data.btrads_result) 
+          : data.btrads_result
+      }
+      return null
     }
   },
   
@@ -70,7 +89,7 @@ export const api = {
     
     getResults: async (patientId: string, params?: any) => {
       const { data } = await apiClient.get(`/api/agents/results/${patientId}`, { params })
-      return data.results
+      return data
     },
     
     test: async (agentId: string, testData: any) => {
@@ -115,6 +134,43 @@ export const api = {
     getAuditTrail: async (patientId: string) => {
       const { data } = await apiClient.get(`/api/reports/${patientId}/audit-trail`)
       return data.audit_trail
+    }
+  },
+  
+  llm: {
+    extract: async (request: {
+      clinical_note: string
+      extraction_type: 'medications' | 'radiation_date'
+      model?: string
+    }) => {
+      const { data } = await apiClient.post('/api/llm/extract', request)
+      return data
+    },
+    
+    getModels: async () => {
+      const { data } = await apiClient.get('/api/llm/models')
+      return data
+    },
+    
+    checkStatus: async () => {
+      const { data } = await apiClient.get('/api/llm/status')
+      return data
+    }
+  },
+  
+  vllm: {
+    extract: async (request: {
+      clinical_note: string
+      extraction_type: 'medications' | 'radiation_date'
+      followup_date?: string
+    }) => {
+      const { data } = await apiClient.post('/api/vllm/extract', request)
+      return data
+    },
+    
+    checkStatus: async () => {
+      const { data } = await apiClient.get('/api/vllm/status')
+      return data
     }
   }
 }

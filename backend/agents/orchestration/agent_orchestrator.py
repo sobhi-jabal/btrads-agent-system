@@ -4,13 +4,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from agents.extraction.prior_assessment import PriorAssessmentAgent
-from agents.extraction.imaging_comparison import ImagingComparisonAgent
-from agents.extraction.medication_status import MedicationStatusAgent
-from agents.extraction.radiation_timeline import RadiationTimelineAgent
-from agents.extraction.component_analysis import ComponentAnalysisAgent
-from agents.extraction.extent_analysis import ExtentAnalysisAgent
-from agents.extraction.progression_pattern import ProgressionPatternAgent
+from config.agent_config import agent_config
 
 from models.patient import PatientData
 from models.agent import AgentResult, ValidationStatus
@@ -27,16 +21,26 @@ class AgentOrchestrator:
         self.ws_manager = websocket_manager
         self.flowchart = BTRADSFlowchart()
         
-        # Initialize agents
-        self.agents = {
-            "prior_assessment": PriorAssessmentAgent(),
-            "imaging_comparison": ImagingComparisonAgent(),
-            "medication_status": MedicationStatusAgent(),
-            "radiation_timeline": RadiationTimelineAgent(),
-            "component_analysis": ComponentAnalysisAgent(),
-            "extent_analysis": ExtentAnalysisAgent(),
-            "progression_pattern": ProgressionPatternAgent(),
-        }
+        # Initialize agents based on configuration
+        self.agents = {}
+        agent_types = [
+            "prior_assessment",
+            "imaging_comparison", 
+            "medication_status",
+            "radiation_timeline",
+            "component_analysis",
+            "extent_analysis",
+            "progression_pattern"
+        ]
+        
+        for agent_type in agent_types:
+            try:
+                AgentClass = agent_config.get_agent_class(agent_type)
+                self.agents[agent_type] = AgentClass()
+                logger.info(f"Initialized {agent_type} agent in {agent_config.mode.value} mode")
+            except Exception as e:
+                logger.error(f"Failed to initialize {agent_type} agent: {e}")
+                raise
         
         # Processing state
         self.active_sessions: Dict[str, Dict[str, Any]] = {}

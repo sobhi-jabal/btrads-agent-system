@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Input Test</title>
+</head>
+<body>
+    <h1>File Input Test</h1>
+    
+    <h2>Test 1: Simple file input</h2>
+    <input type="file" id="test1" accept=".csv" onchange="console.log('Test 1 worked!', this.files)">
+    
+    <h2>Test 2: Hidden input with button</h2>
+    <input type="file" id="test2" accept=".csv" style="display:none" onchange="console.log('Test 2 worked!', this.files)">
+    <button onclick="document.getElementById('test2').click()">Click to select file</button>
+    
+    <h2>Test 3: With ref (React style)</h2>
+    <input type="file" id="test3" accept=".csv" style="display:none">
+    <button id="btn3">Click to select file (ref)</button>
+    
+    <script>
+        // Test 3
+        const fileInput3 = document.getElementById('test3');
+        const btn3 = document.getElementById('btn3');
+        
+        fileInput3.addEventListener('change', (e) => {
+            console.log('Test 3 worked!', e.target.files);
+        });
+        
+        btn3.addEventListener('click', () => {
+            console.log('Button 3 clicked, fileInput3:', fileInput3);
+            fileInput3.click();
+        });
+        
+        // Check if file inputs are working
+        console.log('Page loaded. File inputs ready.');
+    </script>
+</body>
+</html>

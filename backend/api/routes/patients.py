@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import List, Optional
 import pandas as pd
 import io
+import os
 
 from models.patient import Patient, PatientData
 
@@ -28,15 +29,31 @@ async def upload_patients(file: UploadFile = File(...)):
         raise HTTPException(400, "File must be CSV format")
     
     try:
-        # Read CSV
+        # Read CSV - handle potential encoding and multiline issues
         contents = await file.read()
-        df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
+        
+        # Try different encodings if UTF-8 fails
+        try:
+            text_content = contents.decode('utf-8')
+        except UnicodeDecodeError:
+            try:
+                text_content = contents.decode('latin-1')
+            except:
+                text_content = contents.decode('utf-8', errors='ignore')
+        
+        # Parse CSV with proper handling of multiline fields
+        df = pd.read_csv(io.StringIO(text_content), 
+                        escapechar='\\',
+                        on_bad_lines='skip')
         
         # Process and store patients
         patients = await patient_service.process_csv(df)
         return patients
         
     except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"CSV Upload Error: {error_detail}")
         raise HTTPException(400, f"Error processing file: {str(e)}")
 
 @router.get("/", response_model=List[Patient])
@@ -57,16 +74,35 @@ async def get_patient(patient_id: str):
     return patient
 
 @router.post("/{patient_id}/process")
-async def start_processing(patient_id: str, auto_validate: bool = False):
-    """Start processing a patient through BT-RADS flowchart"""
+async def start_processing(
+    patient_id: str, 
+    auto_validate: Optional[bool] = None
+):
+    """Start processing a patient through BT-RADS flowchart
+    
+    Args:
+        patient_id: Patient identifier
+        auto_validate: If True, automatically accept LLM extractions. 
+                      If False, require manual validation for each step.
+                      If None, uses DEFAULT_VALIDATION_MODE from environment.
+    """
     patient = await patient_service.get_patient(patient_id)
     if not patient:
         raise HTTPException(404, "Patient not found")
     
+    # Use default validation mode if not specified
+    if auto_validate is None:
+        default_mode = os.getenv("DEFAULT_VALIDATION_MODE", "auto")
+        auto_validate = default_mode == "auto"
+    
     # Start async processing
     await patient_service.start_processing(patient_id, auto_validate)
     
-    return {"message": "Processing started", "patient_id": patient_id}
+    return {
+        "message": "Processing started", 
+        "patient_id": patient_id,
+        "auto_validate": auto_validate
+    }
 
 @router.get("/{patient_id}/status")
 async def get_processing_status(patient_id: str):

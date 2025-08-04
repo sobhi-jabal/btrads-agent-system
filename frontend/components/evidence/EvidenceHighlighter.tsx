@@ -16,6 +16,9 @@ export interface EvidenceItem {
   category: string
   alternatives?: string[]
   reasoning?: string
+  relevanceScore?: number
+  patternType?: string
+  fullContext?: string
 }
 
 interface EvidenceHighlighterProps {
@@ -185,20 +188,54 @@ export function EvidenceHighlighter({
           <div className="mt-4 space-y-2">
             <h4 className="font-medium text-sm text-muted-foreground">Evidence Summary</h4>
             <div className="grid gap-2">
-              {(selectedCategory ? evidence.filter(e => e.category === selectedCategory) : evidence).map(item => (
-                <div key={item.id} className="flex items-center justify-between p-2 bg-muted/20 rounded text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{getConfidenceIcon(item.confidence)}</span>
-                    <span className="font-medium">{item.category}</span>
-                    <code className="text-xs bg-muted px-1 rounded">{item.matchedPattern}</code>
+              {(selectedCategory ? evidence.filter(e => e.category === selectedCategory) : evidence)
+                .sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
+                .map(item => (
+                <div key={item.id} className="p-3 bg-muted/20 rounded">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{getConfidenceIcon(item.confidence)}</span>
+                      <span className="font-medium">{item.category}</span>
+                      {item.patternType && (
+                        <Badge variant="outline" className="text-xs">
+                          {item.patternType}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.relevanceScore && (
+                        <Badge variant="secondary" className="text-xs">
+                          {Math.round(item.relevanceScore * 100)}% relevant
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className="text-xs">
+                        {item.confidence} confidence
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {item.confidence} confidence
-                    </Badge>
-                    <span className="text-muted-foreground text-xs">
-                      "{item.sourceText}"
-                    </span>
+                  
+                  <div className="space-y-1">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Matched:</span>
+                      <code className="ml-2 text-xs bg-muted px-1 rounded">{item.sourceText}</code>
+                    </div>
+                    
+                    {item.fullContext && (
+                      <div className="text-sm text-muted-foreground">
+                        <span>Context:</span>
+                        <span className="ml-2 italic">...{item.fullContext}...</span>
+                      </div>
+                    )}
+                    
+                    {item.reasoning && (
+                      <div className="text-xs text-muted-foreground">
+                        {item.reasoning}
+                      </div>
+                    )}
+                    
+                    <div className="text-xs text-muted-foreground">
+                      Pattern: <code className="bg-muted px-1 rounded">{item.matchedPattern}</code>
+                    </div>
                   </div>
                 </div>
               ))}

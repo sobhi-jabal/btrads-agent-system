@@ -5,7 +5,7 @@ import json
 import io
 from datetime import datetime
 
-from services.report_service import ReportService
+from services.report_service_sqlite import ReportService
 from models.btrads import BTRADSResult
 
 router = APIRouter()

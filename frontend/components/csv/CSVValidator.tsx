@@ -60,13 +60,13 @@ export function CSVValidator({ csvData, onValidationComplete, isUploading = fals
   const [hasStartedValidation, setHasStartedValidation] = useState(false)
 
   const requiredFieldMappings = {
-    'patient_id': ['patient_id', 'id', 'Patient ID', 'PatientID', 'patient id', 'patient_id', 'ID', 'Patient_ID', 'pid', 'PID'],
-    'clinical_note': ['clinical_note', 'Clinical Note', 'note', 'Notes', 'clinical_notes', 'Clinical_Note', 'clinical note', 'clinical_note_closest', 'Clinical_Note_Closest'],
-    'baseline_date': ['baseline_date', 'Baseline_imaging_date', 'BaselineDate', 'baseline date', 'Baseline Date', 'Baseline_Date'],
-    'followup_date': ['followup_date', 'Followup_imaging_date', 'FollowupDate', 'followup date', 'Followup Date', 'Followup_Date', 'follow_up_date']
+    'patient_id': ['pid', 'PID', 'patient_id', 'id', 'Patient ID', 'PatientID', 'patient id', 'ID', 'Patient_ID'],
+    'clinical_note': ['clinical_note_closest', 'Clinical_Note_Closest', 'clinical_note', 'Clinical Note', 'note', 'Notes', 'clinical_notes', 'Clinical_Note', 'clinical note']
   }
 
   const optionalFieldMappings = {
+    'baseline_date': ['baseline_date', 'Baseline_imaging_date', 'BaselineDate', 'baseline date', 'Baseline Date', 'Baseline_Date'],
+    'followup_date': ['followup_date', 'Followup_imaging_date', 'FollowupDate', 'followup date', 'Followup Date', 'Followup_Date', 'follow_up_date'],
     'baseline_flair_volume': ['baseline_flair_volume', 'Baseline_flair_volume', 'baseline flair volume', 'Baseline FLAIR Volume', 'Baseline_FLAIR_Volume'],
     'followup_flair_volume': ['followup_flair_volume', 'Followup_flair_volume', 'followup flair volume', 'Followup FLAIR Volume', 'Followup_FLAIR_Volume'],
     'flair_change_percentage': ['flair_change_percentage', 'Volume_Difference_flair_Percentage_Change', 'FLAIR Change %', 'flair change percentage', 'FLAIR_Change_Percentage'],
@@ -77,6 +77,7 @@ export function CSVValidator({ csvData, onValidationComplete, isUploading = fals
   }
 
   const validateCSV = useCallback(async () => {
+    console.log('[CSVValidator] Starting validation...');
     setIsValidating(true)
     const csvColumns = csvData.length > 0 ? Object.keys(csvData[0]) : []
     const mappings: ColumnMapping[] = []
@@ -85,7 +86,10 @@ export function CSVValidator({ csvData, onValidationComplete, isUploading = fals
 
     // Add info about found columns
     if (csvColumns.length > 0) {
-      console.log('CSV columns found:', csvColumns)
+      console.log('[CSVValidator] CSV columns found:', csvColumns)
+      console.log('[CSVValidator] Data rows:', csvData.length)
+    } else {
+      console.log('[CSVValidator] No CSV columns found - empty data?')
     }
 
     // Step 1: Column Mapping
@@ -208,6 +212,16 @@ export function CSVValidator({ csvData, onValidationComplete, isUploading = fals
       totalRows: csvData.length,
       validRows
     }
+
+    console.log('[CSVValidator] Validation completed:', {
+      isValid: result.isValid,
+      errors: errors.length,
+      warnings: warnings.length,
+      totalRows: csvData.length,
+      validRows,
+      actualErrors: errors,  // Show actual error messages
+      mappings: result.mappings.map(m => ({ field: m.btradsField, csvColumn: m.csvColumn, status: m.status }))
+    });
 
     setValidationResult(result)
     updateStepStatus(4, 'completed')
@@ -401,7 +415,11 @@ export function CSVValidator({ csvData, onValidationComplete, isUploading = fals
 
                   {validationResult.isValid && (
                     <Button 
-                      onClick={() => onValidationComplete(validationResult)}
+                      onClick={() => {
+                        console.log('[CSVValidator] Upload button clicked');
+                        console.log('[CSVValidator] Calling onValidationComplete with:', validationResult);
+                        onValidationComplete(validationResult);
+                      }}
                       className="w-full" 
                       size="lg"
                       disabled={isUploading}
@@ -419,6 +437,26 @@ export function CSVValidator({ csvData, onValidationComplete, isUploading = fals
                       )}
                     </Button>
                   )}
+                  {/* Debug info for button visibility */}
+                  {!validationResult.isValid && (
+                    <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded">
+                      <strong>Debug:</strong> Upload button hidden because validation failed.
+                      <br />Errors: {validationResult.errors.length}, Warnings: {validationResult.warnings.length}
+                      <br />First error: {validationResult.errors[0]}
+                      <br />Total mappings: {validationResult.mappings.length}
+                      <br />Valid mappings: {validationResult.mappings.filter(m => m.status === 'valid').length}
+                    </div>
+                  )}
+                  
+                  {/* Always show validation state for debugging */}
+                  <div className="text-xs text-muted-foreground p-2 bg-blue-50 rounded border">
+                    <strong>Validation Debug:</strong>
+                    <br />IsValid: {validationResult?.isValid ? 'YES' : 'NO'}
+                    <br />Errors: {validationResult?.errors.length || 0}
+                    <br />Warnings: {validationResult?.warnings.length || 0}
+                    <br />Total Rows: {validationResult?.totalRows || 0}
+                    <br />Valid Rows: {validationResult?.validRows || 0}
+                  </div>
                 </CardContent>
               </>
             )}
